@@ -191,10 +191,9 @@ export default function POSPage() {
       <div className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden print-container">
         {/* Cabecera Negra de Lujo */}
         <div className="p-10 border-b border-slate-100 flex justify-between items-start gap-10">
-          <div className="space-y-6 flex-1 text-left">
-            <div className="no-print">
-              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">Información del Cliente</label>
-              {selectedCustomer ? (
+          <div className="flex-1 space-y-4">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block no-print">Información del Cliente</label>
+            {selectedCustomer ? (
                 <div className="space-y-1">
                   <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">{selectedCustomer.full_name}</h2>
                   <p className="text-sm font-medium text-slate-500">{selectedCustomer.address}</p>
