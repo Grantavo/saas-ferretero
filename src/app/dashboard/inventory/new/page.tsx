@@ -176,10 +176,10 @@ export default function NewProductPage() {
               <input 
                 required
                 type="text" 
-                placeholder="SOLO LETRAS"
+                placeholder="Nombre del producto..."
                 className="w-full px-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase"
                 value={formData.name}
-                onChange={(e) => handleNameChange(e.target.value)}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               />
             </div>
 
@@ -192,7 +192,7 @@ export default function NewProductPage() {
                     type="text" 
                     className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                     value={formData.brand}
-                    onChange={(e) => handleBrandChange(e.target.value)}
+                    onChange={(e) => setFormData(prev => ({ ...prev, brand: e.target.value }))}
                   />
                 </div>
               </div>
