@@ -217,7 +217,7 @@ export default function POSPage() {
               </div>
             </div>
 
-            <div className="space-y-3 w-full max-w-[240px]">
+            <div className="space-y-3 w-full max-w-[300px]">
               <div className="flex justify-between items-center gap-4">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Vencimiento</label>
                 <p className="font-bold text-slate-700 text-sm">
