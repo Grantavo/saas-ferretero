@@ -290,7 +290,7 @@ export default function NewProductPage() {
                     className="w-full pl-4 pr-10 py-4 bg-emerald-50/50 border border-transparent rounded-2xl focus:bg-white focus:border-emerald-500/20 focus:ring-4 focus:ring-emerald-500/5 outline-none transition-all font-black text-emerald-700 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     placeholder="30"
                     value={formData.margin_percentage}
-                    onChange={(e) => handleMarginChange(e.target.value)}
+                    onChange={(e) => setFormData(prev => ({ ...prev, margin_percentage: parseFloat(e.target.value) || 0 }))}
                   />
                 </div>
               </div>
@@ -306,7 +306,7 @@ export default function NewProductPage() {
                   className="w-full pl-8 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold text-xl text-slate-900 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   placeholder="0"
                   value={formData.base_price}
-                  onChange={(e) => handleBasePriceChange(e.target.value)}
+                  onChange={(e) => setFormData(prev => ({ ...prev, base_price: parseFloat(e.target.value) || 0 }))}
                 />
               </div>
             </div>
