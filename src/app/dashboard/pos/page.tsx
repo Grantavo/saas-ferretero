@@ -221,7 +221,6 @@ export default function POSPage() {
               <h1 className="text-4xl font-black text-slate-900 tracking-tighter uppercase leading-none">
                 {docType === 'quote' ? 'Cotización' : 'Factura de Venta'}
               </h1>
-              <p className="text-slate-400 font-black uppercase tracking-[0.3em] text-[9px] mt-2">GrupoJenta | Soluciones Ferreteras</p>
             </div>
 
             <div className="grid grid-cols-2 gap-8 text-right">
