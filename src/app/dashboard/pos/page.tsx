@@ -172,7 +172,10 @@ export default function POSPage() {
           <AnimatePresence>
             {customerSearch && (
               <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className="absolute left-0 right-0 top-full mt-2 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-50 max-h-[300px] overflow-y-auto">
-                {customers.filter(c => c.full_name.toLowerCase().includes(customerSearch.toLowerCase())).map(c => (
+                {customers.filter(c => 
+                  c.full_name?.toLowerCase().includes(customerSearch.toLowerCase()) || 
+                  c.nit?.toLowerCase().includes(customerSearch.toLowerCase())
+                ).map(c => (
                   <button key={c.id} onClick={() => { setSelectedCustomer(c); setCustomerSearch(''); }} className="w-full p-4 text-left hover:bg-slate-50 border-b border-slate-50 last:border-none group">
                     <p className="font-bold text-slate-800 group-hover:text-primary transition-colors uppercase tracking-tight">{c.full_name}</p>
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">NIT: {c.nit}</p>
