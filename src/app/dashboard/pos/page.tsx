@@ -217,14 +217,26 @@ export default function POSPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-8 text-right">
-              <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Fecha</label>
-                <p className="font-bold text-slate-700">{new Date().toLocaleDateString()}</p>
+            <div className="space-y-3 w-full max-w-[240px]">
+              <div className="flex justify-between items-center gap-4">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Vencimiento</label>
+                <p className="font-bold text-slate-700 text-sm">
+                  {docType === 'quote' 
+                    ? new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })
+                    : 'Inmediato'}
+                </p>
               </div>
-              <div>
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Vencimiento</label>
-                <p className="font-bold text-slate-700">{docType === 'quote' ? '8 Días' : 'Contado'}</p>
+              <div className="flex justify-between items-center gap-4">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lista de precios</label>
+                <p className="font-bold text-slate-700 text-sm">Predeterminado (COP)</p>
+              </div>
+              <div className="flex justify-between items-center gap-4">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Términos de pago</label>
+                <p className="font-bold text-slate-700 text-sm">{docType === 'quote' ? '8 Días' : 'Inmediato'}</p>
+              </div>
+              <div className="pt-2 border-t border-slate-50 flex justify-between items-center gap-4">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha Emisión</label>
+                <p className="font-bold text-slate-700 text-sm">{new Date().toLocaleDateString()}</p>
               </div>
             </div>
           </div>
