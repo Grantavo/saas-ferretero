@@ -206,7 +206,7 @@ export default function POSPage() {
                   <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">{selectedCustomer.full_name}</h2>
                   <p className="text-sm font-medium text-slate-500">{selectedCustomer.address}</p>
                   <p className="text-sm font-medium text-slate-500">{selectedCustomer.phone}</p>
-                  <p className="text-xs font-black text-primary uppercase tracking-widest pt-1">NIT: {selectedCustomer.nit}</p>
+                  <p className="text-sm font-medium text-slate-500 uppercase tracking-tight">NIT: {selectedCustomer.nit}</p>
                 </div>
               ) : (
                 <div className="h-20 flex items-center justify-center border-2 border-dashed border-slate-100 rounded-3xl text-slate-300 italic font-bold uppercase text-[10px] tracking-widest no-print">
