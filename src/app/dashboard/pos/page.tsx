@@ -21,13 +21,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-// Importar los mismos iconos de lucide-react
-import { 
-  LayoutDashboard,
-  Calendar,
-  DollarSign
-} from 'lucide-react';
-
 interface Product {
   id: string;
   name: string;
@@ -119,18 +112,17 @@ export default function POSPage() {
     <div className="max-w-[1100px] mx-auto space-y-8 pb-20">
       <style jsx global>{`
         @media print {
-          body * { visibility: hidden; }
-          .print-container, .print-container * { visibility: visible; }
-          .print-container { position: absolute; left: 0; top: 0; width: 100%; }
+          body * { visibility: hidden !important; }
+          .print-container, .print-container * { visibility: visible !important; }
+          .print-container { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
           .no-print { display: none !important; }
-          header, nav, .sidebar { display: none !important; }
         }
       `}</style>
 
-      {/* Header Premium de Selección */}
+      {/* Header Búsqueda */}
       <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 sticky top-0 z-40 backdrop-blur-xl bg-white/90 no-print">
         <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input 
             type="text" 
             placeholder="Buscar productos..."
@@ -161,7 +153,7 @@ export default function POSPage() {
         </div>
 
         <div className="relative md:w-1/3 group">
-          <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+          <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input 
             type="text" 
             placeholder="Buscar cliente..."
@@ -178,7 +170,7 @@ export default function POSPage() {
                 ).map(c => (
                   <button key={c.id} onClick={() => { setSelectedCustomer(c); setCustomerSearch(''); }} className="w-full p-4 text-left hover:bg-slate-50 border-b border-slate-50 last:border-none group">
                     <p className="font-bold text-slate-800 group-hover:text-primary transition-colors uppercase tracking-tight">{c.full_name}</p>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">NIT: {c.nit}</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{c.nit}</p>
                   </button>
                 ))}
               </motion.div>
@@ -187,27 +179,27 @@ export default function POSPage() {
         </div>
       </div>
 
-      {/* Documento Profesional */}
+      {/* Documento */}
       <div className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden print-container">
-        {/* Cabecera Negra de Lujo */}
         <div className="p-10 border-b border-slate-100 flex justify-between items-start gap-10">
+          {/* Columna Izquierda: Cliente */}
           <div className="flex-1 space-y-4">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block no-print">Información del Cliente</label>
             {selectedCustomer ? (
-                <div className="space-y-1">
-                  <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">{selectedCustomer.full_name}</h2>
-                  <p className="text-sm font-medium text-slate-500">{selectedCustomer.address}</p>
-                  <p className="text-sm font-medium text-slate-500">{selectedCustomer.phone}</p>
-                  <p className="text-sm font-medium text-slate-500 uppercase tracking-tight">{selectedCustomer.nit}</p>
-                </div>
-              ) : (
-                <div className="h-20 flex items-center justify-center border-2 border-dashed border-slate-100 rounded-3xl text-slate-300 italic font-bold uppercase text-[10px] tracking-widest no-print">
-                  Selecciona un cliente para generar el documento
-                </div>
-              )}
-            </div>
+              <div className="space-y-1">
+                <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">{selectedCustomer.full_name}</h2>
+                <p className="text-sm font-medium text-slate-500">{selectedCustomer.address}</p>
+                <p className="text-sm font-medium text-slate-500">{selectedCustomer.phone}</p>
+                <p className="text-sm font-medium text-slate-500 uppercase tracking-tight">{selectedCustomer.nit}</p>
+              </div>
+            ) : (
+              <div className="h-20 flex items-center justify-center border-2 border-dashed border-slate-100 rounded-3xl text-slate-300 italic font-bold uppercase text-[10px] tracking-widest no-print">
+                Selecciona un cliente
+              </div>
+            )}
           </div>
 
+          {/* Columna Derecha: Datos Documento */}
           <div className="text-right flex flex-col items-end gap-6">
             <div className="no-print">
               <div className="bg-slate-100 p-1 rounded-2xl flex gap-1">
@@ -219,11 +211,7 @@ export default function POSPage() {
             <div className="space-y-3 w-full max-w-[300px]">
               <div className="flex justify-between items-center gap-4">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Vencimiento</label>
-                <p className="font-bold text-slate-700 text-sm">
-                  {docType === 'quote' 
-                    ? new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' })
-                    : 'Inmediato'}
-                </p>
+                <p className="font-bold text-slate-700 text-sm">{docType === 'quote' ? new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' }) : 'Inmediato'}</p>
               </div>
               <div className="flex justify-between items-center gap-4">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lista de precios</label>
@@ -241,68 +229,40 @@ export default function POSPage() {
           </div>
         </div>
 
-        {/* Tabla Elegante */}
+        {/* Tabla */}
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-50 bg-slate-50/20">
-                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Descripción del Producto</th>
-                <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Cantidad</th>
-                <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Unitario (IVA Incl.)</th>
+                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Descripción</th>
+                <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Cant.</th>
+                <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Unitario</th>
                 <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {cart.map(item => (
-                <tr key={item.id} className="group hover:bg-slate-50/50 transition-colors">
+                <tr key={item.id}>
                   <td className="px-10 py-6">
                     <p className="font-bold text-slate-800 uppercase tracking-tight">{item.name}</p>
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{item.brand}</p>
                   </td>
-                  <td className="px-4 py-6 text-center">
-                    <input 
-                      type="number" 
-                      min="1"
-                      className="w-16 bg-transparent border-none text-center font-bold text-slate-700 p-0 focus:ring-0 no-print"
-                      value={item.quantity}
-                      onChange={(e) => {
-                        const q = parseInt(e.target.value) || 1;
-                        setCart(prev => prev.map(p => p.id === item.id ? {...p, quantity: q} : p));
-                      }}
-                    />
-                    <span className="hidden print:inline font-bold text-slate-700">{item.quantity}</span>
-                  </td>
+                  <td className="px-4 py-6 text-center font-bold text-slate-700">{item.quantity}</td>
                   <td className="px-4 py-6 text-right font-bold text-slate-600">{formatCurrency(item.base_price * (1 + item.tax_percentage/100))}</td>
                   <td className="px-10 py-6 text-right font-black text-slate-900">{formatCurrency(item.base_price * (1 + item.tax_percentage/100) * item.quantity)}</td>
                 </tr>
               ))}
-              {cart.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-10 py-24 text-center">
-                    <div className="flex flex-col items-center gap-3 text-slate-200">
-                      <Package className="w-16 h-16 opacity-10" />
-                      <p className="font-black uppercase tracking-[0.3em] text-[10px]">Sin productos en la orden</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
 
-        {/* Pie de Página con Totales de Impacto */}
+        {/* Totales */}
         <div className="p-10 bg-slate-50/30 flex flex-col md:flex-row justify-between items-start gap-12 border-t border-slate-100">
-          <div className="max-w-md space-y-4">
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              <Shield className="w-3 h-3" /> Términos y Condiciones
-            </div>
+          <div className="max-w-md">
             <p className="text-[10px] text-slate-400 leading-relaxed font-medium uppercase tracking-wider">
-              {docType === 'quote' 
-                ? 'Esta cotización tiene una validez de 8 días. Los precios incluyen IVA. La entrega se realiza tras la confirmación del pago.'
-                : 'Esta factura de venta se asimila en todos sus efectos legales a una letra de cambio. El no pago genera intereses de mora.'}
+              {docType === 'quote' ? 'Vigencia de 8 días. Precios incluyen IVA.' : 'Factura de venta legal.'}
             </p>
           </div>
-
           <div className="w-full md:w-80 space-y-3">
             <div className="flex justify-between text-sm font-bold text-slate-500 uppercase tracking-widest">
               <span>Subtotal</span>
@@ -316,35 +276,13 @@ export default function POSPage() {
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total a Pagar</span>
               <span className="text-4xl font-black text-slate-900 tracking-tighter leading-none">{formatCurrency(total)}</span>
             </div>
-
             <div className="pt-8 flex gap-3 no-print">
-              <button 
-                onClick={handlePrint}
-                disabled={cart.length === 0}
-                className="flex-1 py-5 bg-white border border-slate-200 rounded-[24px] font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
-              >
-                <Printer className="w-4 h-4" /> Imprimir
-              </button>
-              <button 
-                disabled={cart.length === 0}
-                className={cn(
-                  "flex-1 py-5 rounded-[24px] font-black text-[10px] uppercase tracking-widest transition-all text-white flex items-center justify-center gap-2",
-                  docType === 'sale' ? "bg-emerald-600 shadow-xl shadow-emerald-100" : "bg-primary shadow-xl shadow-primary/20"
-                )}
-              >
-                <Save className="w-4 h-4" /> {docType === 'sale' ? 'Facturar' : 'Guardar'}
-              </button>
+              <button onClick={handlePrint} disabled={cart.length === 0} className="flex-1 py-5 bg-white border border-slate-200 rounded-[24px] font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2"><Printer className="w-4 h-4" /> Imprimir</button>
+              <button disabled={cart.length === 0} className={cn("flex-1 py-5 rounded-[24px] font-black text-[10px] uppercase tracking-widest text-white flex items-center justify-center gap-2", docType === 'sale' ? "bg-emerald-600" : "bg-primary")}><Save className="w-4 h-4" /> Guardar</button>
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
-
-// Iconos que faltaban
-function Shield(props: any) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
-  )
 }
