@@ -19,7 +19,7 @@ import { cn } from '@/lib/utils';
 const menuItems = [
   { name: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
   { name: 'Inventario', icon: Package, href: '/dashboard/inventory' },
-  { name: 'Punto de Venta', icon: ShoppingCart, href: '/dashboard/pos' },
+  { name: 'Punto de Venta', icon: ShoppingCart, href: '/dashboard/punto-de-venta' },
   { name: 'Usuarios', icon: Users, href: '/dashboard/users' },
   { name: 'Configuración', icon: Settings, href: '/dashboard/settings' },
 ];
