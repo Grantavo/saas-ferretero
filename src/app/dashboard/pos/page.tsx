@@ -184,7 +184,7 @@ export default function POSPage() {
         <div className="p-10 border-b border-slate-100 flex justify-between items-start gap-10">
           {/* Columna Izquierda: Cliente */}
           <div className="flex-1 space-y-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block no-print">Información del Cliente</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block no-print pt-14">Información del Cliente</label>
             {selectedCustomer ? (
               <div className="space-y-1">
                 <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">{selectedCustomer.full_name}</h2>
