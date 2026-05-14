@@ -105,7 +105,7 @@ export default function NewProductPage() {
             <ArrowLeft className="w-5 h-5 text-slate-400 group-hover:text-primary transition-colors" />
           </Link>
           <div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Nuevo Producto</h1>
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">Nuevo Producto 2026</h1>
             <p className="text-slate-500 font-medium">Completa la información para el catálogo.</p>
           </div>
         </div>
