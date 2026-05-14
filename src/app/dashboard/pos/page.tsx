@@ -16,7 +16,7 @@ import {
   X,
   ChevronDown,
   Filter
-} from 'lucide-center'; // Nota: Usaré lucide-react, corregiré el import si es necesario
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
