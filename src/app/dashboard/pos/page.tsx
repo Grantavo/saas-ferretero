@@ -308,8 +308,8 @@ export default function POSPage() {
               <span>IVA (19%)</span>
               <span>{formatCurrency(tax)}</span>
             </div>
-            <div className="pt-6 border-t border-slate-200 text-right">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Total a Pagar</span>
+            <div className="pt-6 border-t border-slate-200 flex justify-between items-end">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total a Pagar</span>
               <span className="text-4xl font-black text-slate-900 tracking-tighter leading-none">{formatCurrency(total)}</span>
             </div>
 
