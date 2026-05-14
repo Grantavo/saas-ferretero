@@ -243,7 +243,7 @@ export default function POSPage() {
                     </button>
                   ))
                 }
-                {customers.filter(c => c.name?.toLowerCase().includes(customerSearch.toLowerCase())).length === 0 && (
+                {customers.filter(c => c.full_name?.toLowerCase().includes(customerSearch.toLowerCase())).length === 0 && (
                   <div className="p-8 text-center text-slate-300 italic text-sm">
                     No se encontraron clientes
                   </div>
