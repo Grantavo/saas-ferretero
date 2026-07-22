@@ -430,7 +430,7 @@ export default function TenantDetailPage() {
                 <div>
                   <h3 className="font-bold text-slate-800 text-sm">{user.full_name || 'Sin nombre'}</h3>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                    {user.role === 'owner' ? 'Dueño' : user.role === 'admin' ? 'Administrador' : 'Vendedor'}
+                    {user.role === 'owner' ? 'Dueño' : user.role === 'admin' ? 'Administrador' : user.role === 'seller' ? 'Vendedor' : user.role === 'warehouse' ? 'Bodega' : 'Mercadeo'}
                   </p>
                 </div>
               </div>
@@ -438,7 +438,7 @@ export default function TenantDetailPage() {
                 <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
                   user.role === 'owner' ? 'bg-violet-50 text-violet-600' : 'bg-slate-100 text-slate-500'
                 }`}>
-                  {user.role}
+                  {user.role === 'owner' ? 'DUEÑO' : user.role === 'admin' ? 'ADMIN' : user.role === 'seller' ? 'VENDEDOR' : user.role === 'warehouse' ? 'BODEGA' : 'MERCADEO'}
                 </span>
                 <div className="flex gap-1">
                   <button 

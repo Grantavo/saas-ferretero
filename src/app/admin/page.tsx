@@ -53,7 +53,7 @@ export default function AdminDashboard() {
   }, []);
 
   const kpis = [
-    { label: 'Ferreterías Activas', value: stats.tenants, icon: Building2, color: 'from-violet-500 to-indigo-600', shadow: 'shadow-violet-500/20' },
+    { label: 'Negocios Activos', value: stats.tenants, icon: Building2, color: 'from-violet-500 to-indigo-600', shadow: 'shadow-violet-500/20' },
     { label: 'Usuarios Totales', value: stats.users, icon: Users, color: 'from-blue-500 to-cyan-500', shadow: 'shadow-blue-500/20' },
     { label: 'Productos Registrados', value: stats.products, icon: Package, color: 'from-emerald-500 to-teal-500', shadow: 'shadow-emerald-500/20' },
     { label: 'Ventas Realizadas', value: stats.sales, icon: ShoppingCart, color: 'from-orange-500 to-amber-500', shadow: 'shadow-orange-500/20' },
@@ -70,7 +70,7 @@ export default function AdminDashboard() {
           href="/admin/tenants/new"
           className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-6 py-3 rounded-2xl font-black flex items-center gap-2 hover:opacity-90 shadow-lg shadow-violet-500/20 transition-all"
         >
-          <Plus className="w-5 h-5" /> Nueva Ferretería
+          <Plus className="w-5 h-5" /> Nuevo Negocio
         </Link>
       </div>
 
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
         <div className="p-8 flex justify-between items-center border-b border-slate-50">
           <div className="flex items-center gap-3">
             <Activity className="w-5 h-5 text-violet-600" />
-            <h2 className="font-black text-slate-800 text-lg">Ferreterías Recientes</h2>
+            <h2 className="font-black text-slate-800 text-lg">Negocios Recientes</h2>
           </div>
           <Link href="/admin/tenants" className="text-xs font-black text-violet-600 hover:text-violet-500 flex items-center gap-1 uppercase tracking-widest">
             Ver todas <ArrowUpRight className="w-3 h-3" />

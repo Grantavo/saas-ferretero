@@ -94,7 +94,7 @@ export default function NewTenantPage() {
         throw new Error(data.error || 'Error desconocido al crear usuario');
       }
 
-      alert(`¡Ferretería y usuario creados exitosamente!\n\nEl usuario ya está confirmado automáticamente.\n\nCredenciales del cliente:\nEmail: ${userData.email}\nContraseña: ${userData.password}`);
+      alert(`¡Negocio y usuario creados exitosamente!\n\nEl usuario ya está confirmado automáticamente.\n\nCredenciales del cliente:\nEmail: ${userData.email}\nContraseña: ${userData.password}`);
       router.push('/admin/tenants');
     } catch (error: any) {
       alert('Error al crear el usuario: ' + error.message);
@@ -109,11 +109,11 @@ export default function NewTenantPage() {
         href="/admin/tenants"
         className="inline-flex items-center gap-2 text-slate-400 hover:text-slate-600 transition-colors font-bold text-sm"
       >
-        <ArrowLeft className="w-4 h-4" /> Volver a ferreterías
+        <ArrowLeft className="w-4 h-4" /> Volver a negocios
       </Link>
 
       <div>
-        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Nueva Ferretería</h1>
+        <h1 className="text-3xl font-black text-slate-800 tracking-tight">Nuevo Negocio</h1>
         <p className="text-slate-400 mt-1 text-sm font-bold uppercase tracking-widest">
           Paso {step} de 2 — {step === 1 ? 'Datos de la empresa' : 'Crear usuario administrador'}
         </p>
@@ -133,7 +133,7 @@ export default function NewTenantPage() {
           className="bg-white rounded-[40px] border border-slate-100 shadow-sm p-10 space-y-6"
         >
           <div className="flex items-center gap-3 text-violet-600 font-black text-lg pb-4 border-b border-slate-100">
-            <Building2 className="w-6 h-6" /> Datos de la Ferretería
+            <Building2 className="w-6 h-6" /> Datos del Negocio
           </div>
 
           <div className="space-y-2">
@@ -141,7 +141,7 @@ export default function NewTenantPage() {
             <input 
               required
               type="text"
-              placeholder="Ej: Ferretería El Martillo"
+              placeholder="Ej: Mi Negocio"
               className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-violet-500/20 transition-all font-medium"
               value={tenantData.name}
               onChange={(e) => setTenantData({...tenantData, name: e.target.value})}

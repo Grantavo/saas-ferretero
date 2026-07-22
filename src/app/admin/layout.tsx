@@ -18,7 +18,7 @@ import { useRouter } from 'next/navigation';
 
 const adminNav = [
   { name: 'Panel Principal', href: '/admin', icon: LayoutDashboard },
-  { name: 'Ferreterías', href: '/admin/tenants', icon: Building2 },
+  { name: 'Negocios', href: '/admin/tenants', icon: Building2 },
   { name: 'Configuración', href: '/admin/settings', icon: Settings },
 ];
 
@@ -112,18 +112,20 @@ export default function AdminLayout({
 
         {/* Content */}
         <main className="flex-1 overflow-auto p-8">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={pathname}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="h-full"
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          <div className="max-w-7xl mx-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={pathname}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="h-full"
+              >
+                {children}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </main>
       </div>
     </div>

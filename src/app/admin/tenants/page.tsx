@@ -72,14 +72,14 @@ export default function TenantsListPage() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-black text-slate-800 tracking-tight">Ferreterías</h1>
+          <h1 className="text-3xl font-black text-slate-800 tracking-tight">Negocios</h1>
           <p className="text-slate-400 mt-1 text-sm font-bold uppercase tracking-widest">Gestión de cuentas de clientes</p>
         </div>
         <Link
           href="/admin/tenants/new"
           className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-6 py-3 rounded-2xl font-black flex items-center gap-2 hover:opacity-90 shadow-lg shadow-violet-500/20 transition-all"
         >
-          <Plus className="w-5 h-5" /> Nueva Ferretería
+          <Plus className="w-5 h-5" /> Nuevo Negocio
         </Link>
       </div>
 
