@@ -90,6 +90,12 @@ export default function POSPage() {
     setCart(prev => prev.filter(item => item.id !== id));
   };
 
+  const updateQuantity = (id: string, newQty: number) => {
+    setCart(prev => prev.map(item => 
+      item.id === id ? { ...item, quantity: Math.max(0, newQty) } : item
+    ));
+  };
+
   const subtotal = cart.reduce((acc, item) => acc + (item.base_price * item.quantity), 0);
   const tax = cart.reduce((acc, item) => acc + (item.base_price * (item.tax_percentage / 100) * item.quantity), 0);
   const total = subtotal + tax;
@@ -120,44 +126,14 @@ export default function POSPage() {
       `}</style>
 
       {/* Header Búsqueda */}
-      <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 sticky top-0 z-40 backdrop-blur-xl bg-white/90 no-print">
-        <div className="relative flex-1 group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <input 
-            type="text" 
-            placeholder="Buscar productos..."
-            className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <AnimatePresence>
-            {searchTerm && (
-              <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className="absolute left-0 right-0 top-full mt-2 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-50 max-h-[400px] overflow-y-auto">
-                {products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())).map(p => (
-                  <button key={p.id} onClick={() => { addToCart(p); setSearchTerm(''); }} className="w-full p-4 flex items-center justify-between hover:bg-slate-50 border-b border-slate-50 last:border-none transition-colors">
-                    <div className="flex items-center gap-4 text-left">
-                      <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center overflow-hidden">
-                        {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover" /> : <Package className="w-6 h-6 text-slate-200" />}
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-800 uppercase tracking-tight">{p.name}</p>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{p.brand}</p>
-                      </div>
-                    </div>
-                    <p className="font-black text-primary">{formatCurrency(p.base_price * (1 + p.tax_percentage/100))}</p>
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        <div className="relative md:w-1/3 group">
+      <div className="bg-white p-5 md:p-8 rounded-[30px] md:rounded-[40px] border border-slate-100 shadow-sm sticky top-0 z-40 backdrop-blur-xl bg-white/90 no-print">
+        {/* Buscar Cliente */}
+        <div className="relative w-full group">
           <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input 
             type="text" 
             placeholder="Buscar cliente..."
-            className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold"
+            className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-sm md:text-base"
             value={customerSearch}
             onChange={(e) => setCustomerSearch(e.target.value)}
           />
@@ -169,8 +145,8 @@ export default function POSPage() {
                   c.nit?.toLowerCase().includes(customerSearch.toLowerCase())
                 ).map(c => (
                   <button key={c.id} onClick={() => { setSelectedCustomer(c); setCustomerSearch(''); }} className="w-full p-4 text-left hover:bg-slate-50 border-b border-slate-50 last:border-none group">
-                    <p className="font-bold text-slate-800 group-hover:text-primary transition-colors uppercase tracking-tight">{c.full_name}</p>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">{c.nit}</p>
+                    <p className="font-bold text-slate-800 group-hover:text-primary transition-colors uppercase tracking-tight text-sm md:text-base">{c.full_name}</p>
+                    <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mt-1">{c.nit}</p>
                   </button>
                 ))}
               </motion.div>
@@ -197,6 +173,38 @@ export default function POSPage() {
                 Selecciona un cliente
               </div>
             )}
+
+            {/* Buscar Productos */}
+            <div className="relative w-full group pt-4 no-print">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input 
+                type="text" 
+                placeholder="Buscar productos para añadir..."
+                className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-sm md:text-base"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <AnimatePresence>
+                {searchTerm && (
+                  <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className="absolute left-0 right-0 top-full mt-2 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+                    {products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())).map(p => (
+                      <button key={p.id} onClick={() => { addToCart(p); setSearchTerm(''); }} className="w-full p-3 md:p-4 flex items-center justify-between hover:bg-slate-50 border-b border-slate-50 last:border-none transition-colors">
+                        <div className="flex items-center gap-3 md:gap-4 text-left">
+                          <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                            {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover" /> : <Package className="w-5 h-5 md:w-6 md:h-6 text-slate-200" />}
+                          </div>
+                          <div>
+                            <p className="font-bold text-slate-800 uppercase tracking-tight text-sm md:text-base">{p.name}</p>
+                            <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">{p.brand}</p>
+                          </div>
+                        </div>
+                        <p className="font-black text-primary text-sm md:text-base">{formatCurrency(p.base_price * (1 + p.tax_percentage/100))}</p>
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           {/* Columna Derecha: Datos Documento */}
@@ -208,20 +216,20 @@ export default function POSPage() {
               </div>
             </div>
 
-            <div className="space-y-3 w-full max-w-[300px]">
-              <div className="flex justify-between items-center gap-4">
+            <div className="space-y-4 w-full">
+              <div className="flex justify-between items-center gap-8">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Vencimiento</label>
                 <p className="font-bold text-slate-700 text-sm">{docType === 'quote' ? new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' }) : 'Inmediato'}</p>
               </div>
-              <div className="flex justify-between items-center gap-4">
+              <div className="flex justify-between items-center gap-8">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lista de precios</label>
                 <p className="font-bold text-slate-700 text-sm">Predeterminado (COP)</p>
               </div>
-              <div className="flex justify-between items-center gap-4">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Términos de pago</label>
+              <div className="flex justify-between items-center gap-8">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{docType === 'quote' ? 'Vigencia' : 'Términos de pago'}</label>
                 <p className="font-bold text-slate-700 text-sm">{docType === 'quote' ? '8 Días' : 'Inmediato'}</p>
               </div>
-              <div className="pt-2 border-t border-slate-50 flex justify-between items-center gap-4">
+              <div className="pt-2 border-t border-slate-50 flex justify-between items-center gap-8">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha Emisión</label>
                 <p className="font-bold text-slate-700 text-sm">{new Date().toLocaleDateString()}</p>
               </div>
@@ -234,22 +242,38 @@ export default function POSPage() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-50 bg-slate-50/20">
-                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Descripción</th>
-                <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Cant.</th>
-                <th className="px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Unitario</th>
-                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total</th>
+                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Descripción</th>
+                <th className="w-24 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Cant.</th>
+                <th className="w-32 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Sin IVA</th>
+                <th className="w-32 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Unitario</th>
+                <th className="w-40 px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total</th>
+                <th className="w-16 px-4 py-6 no-print"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {cart.map(item => (
-                <tr key={item.id}>
-                  <td className="px-10 py-6">
-                    <p className="font-bold text-slate-800 uppercase tracking-tight">{item.name}</p>
+                <tr key={item.id} className="h-[90px]">
+                  <td className="px-10 py-4">
+                    <p className="font-bold text-slate-800 uppercase tracking-tight line-clamp-1">{item.name}</p>
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{item.brand}</p>
                   </td>
-                  <td className="px-4 py-6 text-center font-bold text-slate-700">{item.quantity}</td>
-                  <td className="px-4 py-6 text-right font-bold text-slate-600">{formatCurrency(item.base_price * (1 + item.tax_percentage/100))}</td>
-                  <td className="px-10 py-6 text-right font-black text-slate-900">{formatCurrency(item.base_price * (1 + item.tax_percentage/100) * item.quantity)}</td>
+                  <td className="w-24 px-4 py-4 text-center">
+                    <input 
+                      type="number" 
+                      value={item.quantity || ''} 
+                      placeholder="0"
+                      onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 0)}
+                      className="w-16 text-center font-bold text-slate-700 bg-slate-50/50 rounded-lg py-2 border-none outline-none focus:ring-2 focus:ring-primary/10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all tabular-nums"
+                    />
+                  </td>
+                  <td className="w-32 px-4 py-4 text-right font-bold text-slate-500 whitespace-nowrap tabular-nums">{formatCurrency(item.base_price)}</td>
+                  <td className="w-32 px-4 py-4 text-right font-bold text-slate-600 whitespace-nowrap tabular-nums">{formatCurrency(item.base_price * (1 + item.tax_percentage/100))}</td>
+                  <td className="w-40 px-10 py-4 text-right font-black text-slate-900 whitespace-nowrap tabular-nums">{formatCurrency(item.base_price * (1 + item.tax_percentage/100) * item.quantity)}</td>
+                  <td className="w-16 px-4 py-4 text-center no-print">
+                    <button onClick={() => removeFromCart(item.id)} className="p-2 text-slate-200 hover:text-red-500 transition-colors">
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -277,8 +301,20 @@ export default function POSPage() {
               <span className="text-4xl font-black text-slate-900 tracking-tighter leading-none">{formatCurrency(total)}</span>
             </div>
             <div className="pt-8 flex gap-3 no-print">
-              <button onClick={handlePrint} disabled={cart.length === 0} className="flex-1 py-5 bg-white border border-slate-200 rounded-[24px] font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2"><Printer className="w-4 h-4" /> Imprimir</button>
-              <button disabled={cart.length === 0} className={cn("flex-1 py-5 rounded-[24px] font-black text-[10px] uppercase tracking-widest text-white flex items-center justify-center gap-2", docType === 'sale' ? "bg-emerald-600" : "bg-primary")}><Save className="w-4 h-4" /> Guardar</button>
+              {docType === 'sale' ? (
+                <button 
+                  onClick={() => { handlePrint(); toast.success('Factura procesada correctamente'); }} 
+                  disabled={cart.length === 0} 
+                  className="flex-1 py-5 bg-[#e2e8f0] text-black border border-[#cbd5e1] rounded-[24px] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-white transition-all shadow-sm disabled:opacity-50"
+                >
+                  <Save className="w-5 h-5" /> Facturar
+                </button>
+              ) : (
+                <>
+                  <button onClick={handlePrint} disabled={cart.length === 0} className="flex-1 py-5 bg-white border border-slate-200 rounded-[24px] font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-50 transition-all"><Printer className="w-4 h-4" /> Imprimir</button>
+                  <button disabled={cart.length === 0} className="flex-1 py-5 bg-primary rounded-[24px] font-black text-[10px] uppercase tracking-widest text-white flex items-center justify-center gap-2 hover:opacity-90 transition-all"><Save className="w-4 h-4" /> Guardar</button>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -1,36 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SaaS Ferretero
 
-## Getting Started
+Sistema de gestión empresarial SaaS para ferreterías. Inventario, punto de venta (POS), reportes y más, todo desde un solo software.
 
-First, run the development server:
+## Características
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Inventario** — Control de stock, entrada/salida de productos, importación masiva
+- **Punto de Venta (POS)** — Interfaz rápida para cobros con soporte de métodos de pago
+- **Clientes** — Registro y gestión de clientes
+- **Ventas** — Historial de ventas y reportes
+- **Pagos** — Control de pagos realizados y pendientes
+- **Módulos adicionales** — Calendario, tareas, chat, historial
+
+## Stack Tecnológico
+
+- **Frontend:** Next.js 16, React, TypeScript, Tailwind CSS, Framer Motion
+- **Backend:** Supabase (Auth, Database, Storage)
+- **Base de datos:** PostgreSQL con Row Level Security (RLS)
+- **Autenticación:** Supabase Auth con soporte multi-tenant
+- **Despliegue:** Vercel
+
+## Arquitectura Multi-tenant
+
+Cada ferretería (tenant) tiene sus propios datos aislados. El sistema soporta:
+
+- Panel Super Admin para gestionar ferreterías, usuarios y módulos
+- Roles por usuario: Dueño, Administrador, Vendedor, Bodega, Mercadeo
+- Activación/desactivación de módulos por tenant
+
+## Variables de Entorno
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your-project-url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

@@ -1,9 +1,12 @@
+import { createServerClient } from '@supabase/ssr';
+import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { createClient as createServerClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
+    const cookieStore = await cookies();
+
     const { userId, newPassword, newEmail } = await request.json();
 
     if (!userId || (!newPassword && !newEmail)) {
@@ -15,14 +18,30 @@ export async function POST(request: Request) {
     }
 
     // 1. Verificar que el que hace la petición es super admin
-    const supabaseServer = await createServerClient();
-    const { data: { user: currentUser } } = await supabaseServer.auth.getUser();
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          },
+        },
+      }
+    );
+
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
 
     if (!currentUser) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    const { data: profile } = await supabaseServer
+    const { data: profile } = await supabase
       .from('profiles')
       .select('is_super_admin')
       .eq('id', currentUser.id)
@@ -33,18 +52,12 @@ export async function POST(request: Request) {
     }
 
     // 2. Usar service_role key para cambiar la contraseña
-    const supabaseAdmin = createClient(
+    const supabaseAdmin = createSupabaseAdmin(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
+      process.env.SUPABASE_SERVICE_ROLE_KEY
     );
 
-    const updatePayload: any = {};
+    const updatePayload: Record<string, string> = {};
     if (newPassword) updatePayload.password = newPassword;
     if (newEmail) updatePayload.email = newEmail;
 

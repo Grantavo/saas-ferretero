@@ -1,8 +1,14 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
-import { Hammer, ShoppingCart, BarChart3, Package, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
+import { motion } from "framer-motion";
+import {
+  Hammer,
+  ShoppingCart,
+  BarChart3,
+  Package,
+  ArrowRight,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -16,13 +22,28 @@ export default function Home() {
           <span className="text-xl font-bold tracking-tight">GrupoJenta</span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-          <Link href="#features" className="hover:text-primary transition-colors">Características</Link>
-          <Link href="#solutions" className="hover:text-primary transition-colors">Soluciones</Link>
-          <Link href="#pricing" className="hover:text-primary transition-colors">Precios</Link>
+          <Link
+            href="#features"
+            className="hover:text-primary transition-colors"
+          >
+            Características
+          </Link>
+          <Link
+            href="#solutions"
+            className="hover:text-primary transition-colors"
+          >
+            Soluciones
+          </Link>
+          <Link
+            href="#pricing"
+            className="hover:text-primary transition-colors"
+          >
+            Precios
+          </Link>
         </div>
         <div>
-          <Link 
-            href="/login" 
+          <Link
+            href="/login"
             className="bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-semibold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
           >
             Iniciar Sesión
@@ -36,33 +57,36 @@ export default function Home() {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-[120px] -z-10 animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-400/10 rounded-full blur-[120px] -z-10" />
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           className="text-center max-w-3xl"
         >
-          <span className="inline-block px-4 py-1.5 mb-6 text-xs font-bold tracking-widest text-primary uppercase bg-primary/10 rounded-full">
-            El futuro de las ferreterías en Colombia
-          </span>
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-[1.1]">
-            Gestiona tu ferretería con <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-600">elegancia y precisión</span>
+            Gestiona tu negocio con{" "}
+            <span className="text-gray-400 italic">el máximo de rendimiento</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-10 leading-relaxed max-w-2xl mx-auto">
-            Inventario, punto de venta y reportes diseñados para ser suaves con tu vista y potentes para tu negocio.
+            Inventario, punto de venta, reportes. Todo desde un solo software.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button className="bg-primary text-primary-foreground px-8 py-4 rounded-2xl text-lg font-bold hover:scale-105 transition-transform shadow-xl shadow-primary/20 flex items-center gap-2">
               Comenzar ahora <ArrowRight className="w-5 h-5" />
             </button>
-            <button className="bg-white border border-border px-8 py-4 rounded-2xl text-lg font-bold hover:bg-slate-50 transition-colors shadow-sm">
-              Ver Demo
-            </button>
+            <a
+              href="https://wa.me/573026043683"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white border border-border px-8 py-4 rounded-2xl text-lg font-bold hover:bg-slate-50 transition-colors shadow-sm inline-block"
+            >
+              Contactar con un consultor
+            </a>
           </div>
         </motion.div>
 
         {/* Feature Preview */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
@@ -73,15 +97,21 @@ export default function Home() {
               <Package className="w-7 h-7 text-primary" />
             </div>
             <h3 className="text-xl font-bold mb-3">Inventario Inteligente</h3>
-            <p className="text-muted-foreground">Control total de stock con alertas automáticas y gestión de variantes.</p>
+            <p className="text-muted-foreground">
+              Control total de stock con alertas automáticas y gestión de
+              variantes.
+            </p>
           </div>
-          
+
           <div className="p-8 rounded-3xl bg-white border border-border/50 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary/5 transition-all group">
             <div className="bg-blue-500/10 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
               <ShoppingCart className="w-7 h-7 text-blue-600" />
             </div>
             <h3 className="text-xl font-bold mb-3">POS de Alta Velocidad</h3>
-            <p className="text-muted-foreground">Ventas rápidas con soporte para lectores de barras e impresoras térmicas.</p>
+            <p className="text-muted-foreground">
+              Ventas rápidas con soporte para lectores de barras e impresoras
+              térmicas.
+            </p>
           </div>
 
           <div className="p-8 rounded-3xl bg-white border border-border/50 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-primary/5 transition-all group">
@@ -89,7 +119,10 @@ export default function Home() {
               <BarChart3 className="w-7 h-7 text-orange-600" />
             </div>
             <h3 className="text-xl font-bold mb-3">Reportes Claros</h3>
-            <p className="text-muted-foreground">Visualiza tu crecimiento con gráficas intuitivas y datos en tiempo real.</p>
+            <p className="text-muted-foreground">
+              Visualiza tu crecimiento con gráficas intuitivas y datos en tiempo
+              real.
+            </p>
           </div>
         </motion.div>
       </section>
@@ -100,11 +133,17 @@ export default function Home() {
             <Hammer className="w-5 h-5 text-primary" />
             <span className="font-bold">GrupoJenta</span>
           </div>
-          <p className="text-sm text-muted-foreground">© 2026 GrupoJenta. Hecho para las ferreterías de Colombia.</p>
+          <p className="text-sm text-muted-foreground">© 2026 GrupoJenta.</p>
           <div className="flex gap-6 text-sm text-muted-foreground font-medium">
-            <Link href="#" className="hover:text-primary transition-colors">Términos</Link>
-            <Link href="#" className="hover:text-primary transition-colors">Privacidad</Link>
-            <Link href="#" className="hover:text-primary transition-colors">Contacto</Link>
+            <Link href="#" className="hover:text-primary transition-colors">
+              Términos
+            </Link>
+            <Link href="#" className="hover:text-primary transition-colors">
+              Privacidad
+            </Link>
+            <Link href="#" className="hover:text-primary transition-colors">
+              Contacto
+            </Link>
           </div>
         </div>
       </footer>

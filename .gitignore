@@ -44,3 +44,9 @@ antigravity/
 brain/
 artifacts/
 logs/
+
+# private dev files
+.agent/
+ejecutar_comandos.md
+reglas_de_cambio.md
+NEXT_SESSION.md
