@@ -68,19 +68,31 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchModules() {
       if (!profile?.tenant_id) return;
-      
-      // Obtener los módulos activos del tenant del usuario explícitamente
-      const { data, error } = await supabase
-        .from('tenant_modules')
-        .select('*')
-        .eq('tenant_id', profile.tenant_id)
-        .eq('is_active', true)
-        .order('module_name');
 
-      if (!error && data) {
-        setModules(data);
+      const [modulesRes, permsRes] = await Promise.all([
+        supabase
+          .from('tenant_modules')
+          .select('*')
+          .eq('tenant_id', profile.tenant_id)
+          .eq('is_active', true)
+          .order('module_name'),
+        supabase
+          .from('role_permissions')
+          .select('*')
+          .eq('tenant_id', profile.tenant_id)
+          .eq('role', profile.role || 'admin'),
+      ]);
+
+      if (!modulesRes.error && modulesRes.data) {
+        let filtered = modulesRes.data;
+        if (permsRes.data && permsRes.data.length > 0) {
+          const allowedKeys = new Set(
+            permsRes.data.filter(p => p.can_access).map(p => p.module_key)
+          );
+          filtered = modulesRes.data.filter(m => allowedKeys.has(m.module_key));
+        }
+        setModules(filtered);
       } else {
-        // Fallback: si no hay módulos configurados, mostrar todos los por defecto
         setModules([
           { module_key: 'inventory', module_name: 'Inventario', is_active: true },
           { module_key: 'pos', module_name: 'Punto de Venta', is_active: true },
@@ -96,7 +108,7 @@ export default function DashboardPage() {
       }
       setModulesLoading(false);
     }
-    
+
     if (!loading && profile) {
       fetchModules();
     }

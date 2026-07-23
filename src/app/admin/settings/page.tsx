@@ -207,7 +207,7 @@ export default function AdminSettingsPage() {
             </div>
             <h3 className="font-black text-slate-800 text-lg">Rol de Super Administrador</h3>
             <p className="text-sm text-slate-600 font-medium leading-relaxed">
-              Tienes acceso total a todas las configuraciones del sistema, ferreterías, usuarios y módulos. Recuerda que los cambios realizados aquí pueden afectar a todos los clientes de la plataforma.
+              Tienes acceso total a todas las configuraciones del sistema. Recuerda que los cambios realizados aquí pueden afectar a todos los clientes de la plataforma.
             </p>
           </motion.div>
         </div>

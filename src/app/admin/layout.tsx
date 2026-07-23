@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -9,7 +10,9 @@ import {
   LayoutDashboard,
   Building2,
   Settings,
-  ChevronRight
+  ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -29,6 +32,7 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -39,22 +43,35 @@ export default function AdminLayout({
   return (
     <div className="flex min-h-screen bg-[#f8f9ff]">
       {/* Admin Sidebar */}
-      <aside className="w-72 bg-white border-r border-slate-100 flex flex-col shadow-sm z-10">
+      <aside className={`${sidebarCollapsed ? 'w-20' : 'w-72'} bg-white border-r border-slate-100 flex flex-col shadow-sm z-10 transition-all duration-300`}>
         {/* Logo */}
-        <div className="p-6 border-b border-slate-100">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20">
+        <div className={`${sidebarCollapsed ? 'p-3' : 'p-6'} border-b border-slate-100`}>
+          <div className={`flex items-center ${sidebarCollapsed ? 'justify-between gap-1' : 'gap-3'}`}>
+            <div className={`${sidebarCollapsed ? 'w-9 h-9' : 'w-10 h-10'} bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20 shrink-0`}>
               <Shield className="w-5 h-5 text-white" />
             </div>
-            <div>
-              <h1 className="text-slate-800 font-black tracking-tight text-sm">GRUPOJENTA</h1>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Super Admin</p>
-            </div>
+            {!sidebarCollapsed && (
+              <div className="overflow-hidden flex-1">
+                <h1 className="text-slate-800 font-black tracking-tight text-sm whitespace-nowrap">GRUPOJENTA</h1>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Super Admin</p>
+              </div>
+            )}
+            <button
+              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+              title={sidebarCollapsed ? 'Expandir menú' : 'Colapsar menú'}
+              className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all shrink-0"
+            >
+              {sidebarCollapsed ? (
+                <PanelLeftOpen className="w-4 h-4" />
+              ) : (
+                <PanelLeftClose className="w-4 h-4" />
+              )}
+            </button>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-3 space-y-1">
           {adminNav.map((item) => {
             const isActive = pathname === item.href || 
               (item.href !== '/admin' && pathname.startsWith(item.href));
@@ -63,29 +80,36 @@ export default function AdminLayout({
               <Link
                 key={item.href}
                 href={item.href}
+                title={sidebarCollapsed ? item.name : undefined}
                 className={cn(
-                  "flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all",
+                  "flex items-center rounded-2xl font-bold text-sm transition-all",
+                  sidebarCollapsed ? 'justify-center px-0 py-3.5' : 'gap-3 px-4 py-3.5',
                   isActive
                     ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20"
                     : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
                 )}
               >
-                <item.icon className="w-5 h-5" />
-                {item.name}
-                {isActive && <ChevronRight className="w-4 h-4 ml-auto" />}
+                <item.icon className={`${sidebarCollapsed ? 'w-5 h-5' : 'w-5 h-5 shrink-0'}`} />
+                {!sidebarCollapsed && (
+                  <span className="truncate">{item.name}</span>
+                )}
+                {isActive && !sidebarCollapsed && <ChevronRight className="w-4 h-4 ml-auto shrink-0" />}
               </Link>
             );
           })}
         </nav>
 
         {/* Logout */}
-        <div className="p-4 border-t border-slate-100">
+        <div className="p-3 border-t border-slate-100">
           <button 
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm text-red-500 hover:bg-red-50 transition-all"
+            title={sidebarCollapsed ? 'Cerrar Sesión' : undefined}
+            className={`w-full flex items-center rounded-2xl font-bold text-sm text-red-500 hover:bg-red-50 transition-all ${
+              sidebarCollapsed ? 'justify-center py-3.5' : 'gap-3 px-4 py-3.5'
+            }`}
           >
-            <LogOut className="w-5 h-5" />
-            Cerrar Sesión
+            <LogOut className="w-5 h-5 shrink-0" />
+            {!sidebarCollapsed && 'Cerrar Sesión'}
           </button>
         </div>
       </aside>
