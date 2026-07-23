@@ -52,6 +52,9 @@ export default function NewTenantPage() {
       // Crear módulos por defecto
       await supabase.rpc('create_default_modules', { p_tenant_id: tenant.id });
 
+      // Crear permisos por rol por defecto
+      await supabase.rpc('create_default_role_permissions', { p_tenant_id: tenant.id });
+
       // Crear suscripción trial
       await supabase.from('subscriptions').insert([{
         tenant_id: tenant.id,
@@ -84,7 +87,7 @@ export default function NewTenantPage() {
           password: userData.password,
           full_name: userData.full_name,
           tenant_id: createdTenantId,
-          role: 'owner',
+          role: 'admin',
         }),
       });
 

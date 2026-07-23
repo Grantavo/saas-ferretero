@@ -225,7 +225,7 @@ export default function DashboardLayout({
                   >
                     <div className="p-4 border-b border-slate-50">
                       <p className="font-bold text-slate-800 text-sm">{profile?.full_name || user?.email}</p>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{profile?.role || 'Usuario'}</p>
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{profile?.role === 'admin' ? 'Administrador' : profile?.role === 'accounting' ? 'Contabilidad' : profile?.role === 'seller' ? 'Ventas' : profile?.role === 'warehouse' ? 'Bodega' : profile?.role === 'marketing' ? 'Mercadeo' : 'Usuario'}</p>
                     </div>
                     <div className="p-2">
                       <Link 

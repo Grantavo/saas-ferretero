@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       user_metadata: {
         full_name: full_name || '',
         tenant_id: tenant_id,
-        role: role || 'owner',
+        role: role || 'admin',
         is_super_admin: false,
       },
     });

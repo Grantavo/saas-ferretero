@@ -73,7 +73,7 @@ export default function TenantDetailPage() {
 
   // States for Adding User
   const [showAddUser, setShowAddUser] = useState(false);
-  const [newUser, setNewUser] = useState({ full_name: '', email: '', password: '', role: 'seller' });
+  const [newUser, setNewUser] = useState({ full_name: '', email: '', password: '', role: 'admin' });
   const [savingUser, setSavingUser] = useState(false);
 
   // States for Changing Password/Email/Role
@@ -136,7 +136,7 @@ export default function TenantDetailPage() {
 
       alert(`Usuario creado:\nEmail: ${newUser.email}\nContraseña: ${newUser.password}`);
       setShowAddUser(false);
-      setNewUser({ full_name: '', email: '', password: '', role: 'seller' });
+      setNewUser({ full_name: '', email: '', password: '', role: 'admin' });
       fetchData();
     } catch (error: any) {
       alert('Error: ' + error.message);
@@ -401,9 +401,9 @@ export default function TenantDetailPage() {
                   className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none focus:ring-2 focus:ring-violet-500/20 shadow-sm"
                   value={newUser.role} onChange={(e) => setNewUser({...newUser, role: e.target.value})}
                 >
-                  <option value="seller">Vendedor</option>
-                  <option value="owner">Dueño</option>
                   <option value="admin">Administrador</option>
+                  <option value="accounting">Contabilidad</option>
+                  <option value="seller">Ventas</option>
                   <option value="warehouse">Bodega</option>
                   <option value="marketing">Mercadeo</option>
                 </select>
@@ -430,15 +430,15 @@ export default function TenantDetailPage() {
                 <div>
                   <h3 className="font-bold text-slate-800 text-sm">{user.full_name || 'Sin nombre'}</h3>
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                    {user.role === 'owner' ? 'Dueño' : user.role === 'admin' ? 'Administrador' : user.role === 'seller' ? 'Vendedor' : user.role === 'warehouse' ? 'Bodega' : 'Mercadeo'}
+                    {user.role === 'admin' ? 'Administrador' : user.role === 'accounting' ? 'Contabilidad' : user.role === 'seller' ? 'Ventas' : user.role === 'warehouse' ? 'Bodega' : 'Mercadeo'}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                  user.role === 'owner' ? 'bg-violet-50 text-violet-600' : 'bg-slate-100 text-slate-500'
+                  user.role === 'admin' ? 'bg-violet-50 text-violet-600' : 'bg-slate-100 text-slate-500'
                 }`}>
-                  {user.role === 'owner' ? 'DUEÑO' : user.role === 'admin' ? 'ADMIN' : user.role === 'seller' ? 'VENDEDOR' : user.role === 'warehouse' ? 'BODEGA' : 'MERCADEO'}
+                  {user.role === 'admin' ? 'ADMIN' : user.role === 'accounting' ? 'CONTABILIDAD' : user.role === 'seller' ? 'VENTAS' : user.role === 'warehouse' ? 'BODEGA' : 'MERCADEO'}
                 </span>
                 <div className="flex gap-1">
                   <button 
@@ -497,9 +497,9 @@ export default function TenantDetailPage() {
                     className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm outline-none focus:ring-2 focus:ring-amber-500/20"
                     value={newRole} onChange={(e) => setNewRole(e.target.value)}
                   >
-                    <option value="owner">Dueño</option>
                     <option value="admin">Administrador</option>
-                    <option value="seller">Vendedor</option>
+                    <option value="accounting">Contabilidad</option>
+                    <option value="seller">Ventas</option>
                     <option value="warehouse">Bodega</option>
                     <option value="marketing">Mercadeo</option>
                   </select>
