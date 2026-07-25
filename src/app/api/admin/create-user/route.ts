@@ -1,80 +1,74 @@
-import { createServerClient } from '@supabase/ssr';
-import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { createClient as createServerClient } from '@/lib/supabase/server';
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies();
-    
-    // 1. Verificar sesión actual del usuario que hace la petición
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            // Read-only on server components/routes if not modified correctly, but we only need to read
-          },
-        },
-      }
-    );
+    const { email, password, full_name, tenant_id, role } = await request.json();
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (!email || !password || !tenant_id) {
+      return NextResponse.json({ error: 'Faltan datos obligatorios' }, { status: 400 });
+    }
 
-    if (authError || !user) {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.error('[create-user] Missing SUPABASE_SERVICE_ROLE_KEY');
+      return NextResponse.json({ error: 'Error de configuración del servidor' }, { status: 500 });
+    }
+
+    // 1. Verificar que el que hace la petición es super admin
+    const supabase = await createServerClient();
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+
+    if (!currentUser) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
     }
 
-    // 2. Verificar que el usuario sea Super Admin
     const { data: profile } = await supabase
       .from('profiles')
       .select('is_super_admin')
-      .eq('id', user.id)
+      .eq('id', currentUser.id)
       .single();
 
     if (!profile?.is_super_admin) {
       return NextResponse.json({ error: 'Permisos insuficientes' }, { status: 403 });
     }
 
-    // 3. Inicializar el cliente Admin (con Service Role Key)
-    const supabaseAdmin = createSupabaseAdmin(
+    // 2. Usar service_role key para crear el usuario
+    const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+        },
+      }
     );
 
-    // 4. Leer los datos del nuevo usuario
-    const body = await request.json();
-    const { email, password, full_name, tenant_id, role } = body;
+    console.log('[create-user] Creating user for tenant:', tenant_id, 'email:', email);
 
-    if (!email || !password || !tenant_id) {
-      return NextResponse.json({ error: 'Faltan datos obligatorios' }, { status: 400 });
-    }
-
-    // 5. Crear el usuario e instantáneamente confirmarlo
-    const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
       user_metadata: {
         full_name: full_name || '',
-        tenant_id: tenant_id,
+        tenant_id,
         role: role || 'admin',
         is_super_admin: false,
       },
     });
 
-    if (createError) {
-      return NextResponse.json({ error: createError.message }, { status: 400 });
+    if (error) {
+      console.error('[create-user] Supabase admin.createUser error:', error.message, error);
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, user: newUser.user });
+    console.log('[create-user] Usuario creado exitosamente:', data.user.id);
+    return NextResponse.json({ success: true, user: data.user });
 
-  } catch (error: any) {
-    console.error('Error in create-user route:', error);
-    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
+  } catch (err: any) {
+    console.error('[create-user] Unexpected error:', err);
+    return NextResponse.json({ error: err.message || 'Error interno del servidor' }, { status: 500 });
   }
 }

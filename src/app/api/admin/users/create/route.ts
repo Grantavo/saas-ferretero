@@ -44,6 +44,8 @@ export async function POST(request: Request) {
       }
     );
 
+    console.log('[users-create] Creating user for tenant:', tenant_id, 'email:', email);
+
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -53,15 +55,18 @@ export async function POST(request: Request) {
         tenant_id,
         role,
         is_super_admin: false,
-      }
+      },
     });
 
     if (error) {
+      console.error('[users-create] Supabase admin.createUser error:', error.message, error);
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    console.log('[users-create] Usuario creado exitosamente:', data.user.id);
     return NextResponse.json({ success: true, user: data.user });
   } catch (err: any) {
+    console.error('[users-create] Unexpected error:', err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
