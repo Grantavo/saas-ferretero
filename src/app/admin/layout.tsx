@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -12,12 +12,15 @@ import {
   Settings,
   ChevronRight,
   PanelLeftClose,
-  PanelLeftOpen
+  PanelLeftOpen,
+  Menu,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
+import { Toaster } from 'sonner';
 
 const adminNav = [
   { name: 'Panel Principal', href: '/admin', icon: LayoutDashboard },
@@ -33,6 +36,16 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileSidebarOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileSidebarOpen]);
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -40,85 +53,122 @@ export default function AdminLayout({
     router.push('/login');
   };
 
-  return (
-    <div className="flex min-h-screen bg-[#f8f9ff]">
-      {/* Admin Sidebar */}
-      <aside className={`${sidebarCollapsed ? 'w-20' : 'w-72'} bg-white border-r border-slate-100 flex flex-col shadow-sm z-10 transition-all duration-300`}>
-        {/* Logo */}
-        <div className={`${sidebarCollapsed ? 'p-3' : 'p-6'} border-b border-slate-100`}>
-          <div className={`flex items-center ${sidebarCollapsed ? 'justify-between gap-1' : 'gap-3'}`}>
-            <div className={`${sidebarCollapsed ? 'w-9 h-9' : 'w-10 h-10'} bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20 shrink-0`}>
-              <Shield className="w-5 h-5 text-white" />
+  const sidebarContent = (collapsed: boolean, showToggle: boolean) => (
+    <>
+      <div className={`${collapsed ? 'p-3' : 'p-6'} border-b border-slate-100`}>
+        <div className={`flex items-center ${collapsed ? 'justify-between gap-1' : 'gap-3'}`}>
+          <div className={`${collapsed ? 'w-9 h-9' : 'w-10 h-10'} bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20 shrink-0`}>
+            <Shield className="w-5 h-5 text-white" />
+          </div>
+          {!collapsed && (
+            <div className="overflow-hidden flex-1">
+              <h1 className="text-slate-800 font-black tracking-tight text-sm whitespace-nowrap">GRUPOJENTA</h1>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Super Admin</p>
             </div>
-            {!sidebarCollapsed && (
-              <div className="overflow-hidden flex-1">
-                <h1 className="text-slate-800 font-black tracking-tight text-sm whitespace-nowrap">GRUPOJENTA</h1>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Super Admin</p>
-              </div>
-            )}
+          )}
+          {showToggle && (
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              title={sidebarCollapsed ? 'Expandir menú' : 'Colapsar menú'}
+              title={collapsed ? 'Expandir menú' : 'Colapsar menú'}
               className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all shrink-0"
             >
-              {sidebarCollapsed ? (
-                <PanelLeftOpen className="w-4 h-4" />
-              ) : (
-                <PanelLeftClose className="w-4 h-4" />
-              )}
+              {collapsed ? <PanelLeftOpen className="w-4 h-4" /> : <PanelLeftClose className="w-4 h-4" />}
             </button>
-          </div>
+          )}
         </div>
+      </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-3 space-y-1">
-          {adminNav.map((item) => {
-            const isActive = pathname === item.href || 
-              (item.href !== '/admin' && pathname.startsWith(item.href));
-            
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                title={sidebarCollapsed ? item.name : undefined}
-                className={cn(
-                  "flex items-center rounded-2xl font-bold text-sm transition-all",
-                  sidebarCollapsed ? 'justify-center px-0 py-3.5' : 'gap-3 px-4 py-3.5',
-                  isActive
-                    ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20"
-                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
-                )}
-              >
-                <item.icon className={`${sidebarCollapsed ? 'w-5 h-5' : 'w-5 h-5 shrink-0'}`} />
-                {!sidebarCollapsed && (
-                  <span className="truncate">{item.name}</span>
-                )}
-                {isActive && !sidebarCollapsed && <ChevronRight className="w-4 h-4 ml-auto shrink-0" />}
-              </Link>
-            );
-          })}
-        </nav>
+      <nav className="flex-1 p-3 space-y-1">
+        {adminNav.map((item) => {
+          const isActive = pathname === item.href || 
+            (item.href !== '/admin' && pathname.startsWith(item.href));
+          
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              title={collapsed ? item.name : undefined}
+              className={cn(
+                "flex items-center rounded-2xl font-bold text-sm transition-all",
+                collapsed ? 'justify-center px-0 py-3.5' : 'gap-3 px-4 py-3.5',
+                isActive
+                  ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/20"
+                  : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+              )}
+            >
+              <item.icon className="w-5 h-5 shrink-0" />
+              {!collapsed && <span className="truncate">{item.name}</span>}
+              {isActive && !collapsed && <ChevronRight className="w-4 h-4 ml-auto shrink-0" />}
+            </Link>
+          );
+        })}
+      </nav>
 
-        {/* Logout */}
-        <div className="p-3 border-t border-slate-100">
-          <button 
-            onClick={handleLogout}
-            title={sidebarCollapsed ? 'Cerrar Sesión' : undefined}
-            className={`w-full flex items-center rounded-2xl font-bold text-sm text-red-500 hover:bg-red-50 transition-all ${
-              sidebarCollapsed ? 'justify-center py-3.5' : 'gap-3 px-4 py-3.5'
-            }`}
-          >
-            <LogOut className="w-5 h-5 shrink-0" />
-            {!sidebarCollapsed && 'Cerrar Sesión'}
-          </button>
-        </div>
+      <div className="p-3 border-t border-slate-100">
+        <button 
+          onClick={handleLogout}
+          title={collapsed ? 'Cerrar Sesión' : undefined}
+          className={`w-full flex items-center rounded-2xl font-bold text-sm text-red-500 hover:bg-red-50 transition-all ${
+            collapsed ? 'justify-center py-3.5' : 'gap-3 px-4 py-3.5'
+          }`}
+        >
+          <LogOut className="w-5 h-5 shrink-0" />
+          {!collapsed && 'Cerrar Sesión'}
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="flex min-h-screen bg-[#f8f9ff]">
+      {/* Desktop Sidebar */}
+      <aside className={`hidden lg:flex ${sidebarCollapsed ? 'w-20' : 'w-72'} bg-white border-r border-slate-100 flex-col shadow-sm z-10 transition-all duration-300`}>
+        {sidebarContent(sidebarCollapsed, true)}
       </aside>
+
+      {/* Mobile Sidebar Overlay */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => setMobileSidebarOpen(false)} />
+          <motion.aside
+            initial={{ x: -300 }}
+            animate={{ x: 0 }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className="fixed left-0 top-0 h-full w-72 bg-white shadow-2xl flex flex-col"
+          >
+            <div className="p-6 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/20 shrink-0">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
+                <div className="overflow-hidden flex-1">
+                  <h1 className="text-slate-800 font-black tracking-tight text-sm whitespace-nowrap">GRUPOJENTA</h1>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Super Admin</p>
+                </div>
+                <button
+                  onClick={() => setMobileSidebarOpen(false)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            {sidebarContent(false, false)}
+          </motion.aside>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-slate-100 flex items-center justify-between px-8 z-20">
-          <div>
+        <header className="h-16 bg-white/80 backdrop-blur-xl border-b border-slate-100 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-20">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileSidebarOpen(true)}
+              className="lg:hidden p-2 hover:bg-slate-50 rounded-xl text-slate-400 hover:text-slate-600 transition-all"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Panel de Administración</p>
           </div>
           <div className="flex items-center gap-4">
@@ -126,8 +176,8 @@ export default function AdminLayout({
               <Bell className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
-              <span className="text-xs font-bold text-slate-600">Admin</span>
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-md shadow-violet-500/20">
+              <span className="hidden sm:inline text-xs font-bold text-slate-600">Admin</span>
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-md shadow-violet-500/20 shrink-0">
                 G
               </div>
             </div>
@@ -135,7 +185,7 @@ export default function AdminLayout({
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-auto p-8">
+        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             <AnimatePresence mode="wait">
               <motion.div
@@ -152,6 +202,15 @@ export default function AdminLayout({
           </div>
         </main>
       </div>
+
+      <Toaster
+        position="top-right"
+        richColors
+        closeButton
+        toastOptions={{
+          style: { fontFamily: 'inherit', fontWeight: 600, fontSize: '14px' },
+        }}
+      />
     </div>
   );
 }

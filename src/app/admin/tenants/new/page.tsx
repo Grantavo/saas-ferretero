@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 export default function NewTenantPage() {
   const router = useRouter();
@@ -32,6 +33,7 @@ export default function NewTenantPage() {
     password: '',
   });
   const [createdTenantId, setCreatedTenantId] = useState<string | null>(null);
+  const [showCredentials, setShowCredentials] = useState(false);
 
   const supabase = createClient();
 
@@ -65,7 +67,7 @@ export default function NewTenantPage() {
       setCreatedTenantId(tenant.id);
       setStep(2);
     } catch (error: any) {
-      alert('Error al crear la ferretería: ' + error.message);
+      toast.error('Error al crear la ferretería: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -76,7 +78,6 @@ export default function NewTenantPage() {
     setLoading(true);
 
     try {
-      // Crear usuario a través de nuestra API segura (que usa Service Role)
       const res = await fetch('/api/admin/create-user', {
         method: 'POST',
         headers: {
@@ -97,13 +98,18 @@ export default function NewTenantPage() {
         throw new Error(data.error || 'Error desconocido al crear usuario');
       }
 
-      alert(`¡Negocio y usuario creados exitosamente!\n\nEl usuario ya está confirmado automáticamente.\n\nCredenciales del cliente:\nEmail: ${userData.email}\nContraseña: ${userData.password}`);
-      router.push('/admin/tenants');
+      setShowCredentials(true);
     } catch (error: any) {
-      alert('Error al crear el usuario: ' + error.message);
+      console.error('[create-user] Error en frontend:', error);
+      toast.error('Error al crear el usuario: ' + error.message);
     } finally {
       setLoading(false);
     }
+  };
+
+  const closeCredentials = () => {
+    setShowCredentials(false);
+    router.push('/admin/tenants');
   };
 
   return (
@@ -151,7 +157,7 @@ export default function NewTenantPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">NIT</label>
               <input 
@@ -264,6 +270,67 @@ export default function NewTenantPage() {
             {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Save className="w-6 h-6" /> Crear Cuenta Completa</>}
           </button>
         </motion.form>
+      )}
+
+      {/* Credentials Modal */}
+      {showCredentials && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-[24px] p-8 max-w-md w-full shadow-2xl space-y-6"
+          >
+            <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto">
+              <UserPlus className="w-7 h-7 text-emerald-600" />
+            </div>
+
+            <div className="text-center">
+              <h3 className="text-xl font-black text-slate-800">¡Cuenta creada!</h3>
+              <p className="text-slate-500 text-sm mt-1">
+                El negocio y el usuario administrador están listos.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 rounded-2xl p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Email</span>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(userData.email); toast.success('Email copiado'); }}
+                  className="text-[10px] font-black text-violet-600 uppercase tracking-widest hover:text-violet-700 transition-colors"
+                >
+                  Copiar
+                </button>
+              </div>
+              <p className="text-sm font-bold text-slate-800 break-all">{userData.email}</p>
+
+              <div className="border-t border-slate-200 pt-3 flex items-center justify-between">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Contraseña</span>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(userData.password); toast.success('Contraseña copiada'); }}
+                  className="text-[10px] font-black text-violet-600 uppercase tracking-widest hover:text-violet-700 transition-colors"
+                >
+                  Copiar
+                </button>
+              </div>
+              <p className="text-sm font-bold text-slate-800 font-mono tracking-wider">{userData.password}</p>
+            </div>
+
+            <p className="text-[10px] text-slate-400 text-center font-bold">
+              El usuario ya está confirmado automáticamente. Comparte estas credenciales con el cliente.
+            </p>
+
+            <button
+              onClick={closeCredentials}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black text-sm hover:opacity-90 transition-all shadow-lg shadow-violet-500/20"
+            >
+              Ir a lista de negocios
+            </button>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );

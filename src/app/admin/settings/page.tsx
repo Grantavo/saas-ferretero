@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
 import { 
-  Settings, 
   User, 
   Mail, 
   Save, 
@@ -12,6 +11,7 @@ import {
   Shield,
   Key
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -20,10 +20,6 @@ export default function AdminSettingsPage() {
   const [userId, setUserId] = useState('');
   
   const supabase = createClient();
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
 
   async function fetchProfile() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -44,6 +40,11 @@ export default function AdminSettingsPage() {
     setLoading(false);
   }
 
+  useEffect(() => {
+    fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -62,12 +63,13 @@ export default function AdminSettingsPage() {
       if (user && user.email !== profile.email) {
         const { error: emailError } = await supabase.auth.updateUser({ email: profile.email });
         if (emailError) throw emailError;
-        alert('Perfil guardado. Si cambiaste tu correo, revisa tu bandeja de entrada para confirmarlo.');
+        toast.success('Perfil guardado. Si cambiaste tu correo, revisa tu bandeja de entrada para confirmarlo.');
       } else {
-        alert('Perfil guardado exitosamente.');
+        toast.success('Perfil guardado exitosamente.');
       }
-    } catch (error: any) {
-      alert('Error al guardar: ' + error.message);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Error desconocido';
+      toast.error('Error al guardar: ' + msg);
     } finally {
       setSaving(false);
     }
@@ -82,10 +84,11 @@ export default function AdminSettingsPage() {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
-      alert('Contraseña actualizada exitosamente.');
+      toast.success('Contraseña actualizada exitosamente.');
       setNewPassword('');
-    } catch (error: any) {
-      alert('Error: ' + error.message);
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Error desconocido';
+      toast.error('Error: ' + msg);
     } finally {
       setChangingPassword(false);
     }

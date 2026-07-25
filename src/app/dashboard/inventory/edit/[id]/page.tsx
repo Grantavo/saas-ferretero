@@ -292,7 +292,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value.toUpperCase()})}
               />
             </div>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Marca</label>
                 <input 
@@ -308,7 +308,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Código de Barras</label>
                 <input 
@@ -330,7 +330,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             <div className="flex items-center gap-2 text-primary font-bold mb-2 uppercase tracking-widest text-xs">
               <Warehouse className="w-5 h-5" /> Inventario
             </div>
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Stock Actual</label>
                 <input 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "@/providers/UserContext";
-import { Toaster } from 'sonner';
+import { Toaster } from "sonner";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -10,8 +10,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "GrupoJenta | SaaS Ferretero",
-  description: "La plataforma de gestión para ferreterías más avanzada de Colombia",
+  title: "GrupoJenta",
+  description: "La plataforma de gestión de negocios.",
 };
 
 export default function RootLayout({

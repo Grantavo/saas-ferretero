@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { toast } from 'sonner';
 
 const moduleIcons: Record<string, any> = {
   inventory: Package,
@@ -86,6 +87,8 @@ export default function TenantDetailPage() {
   const [newEmail, setNewEmail] = useState('');
   const [newRole, setNewRole] = useState('');
   const [updatingUser, setUpdatingUser] = useState(false);
+  const [showUserCredentials, setShowUserCredentials] = useState(false);
+  const [userDeleteConfirm, setUserDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
 
   // States for Role Permissions
   const [rolePermissions, setRolePermissions] = useState<any[]>([]);
@@ -179,12 +182,13 @@ export default function TenantDetailPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al crear usuario');
 
-      alert(`Usuario creado:\nEmail: ${newUser.email}\nContraseña: ${newUser.password}`);
+      setShowUserCredentials(true);
       setShowAddUser(false);
       setNewUser({ full_name: '', email: '', password: '', role: 'admin' });
       fetchData();
     } catch (error: any) {
-      alert('Error: ' + error.message);
+      toast.error('Error: ' + error.message);
+      console.error('[create-user-detail] Error:', error);
     } finally {
       setSavingUser(false);
     }
@@ -197,8 +201,9 @@ export default function TenantDetailPage() {
       if (error) throw error;
       setTenant({ ...tenant, ...tenantForm });
       setEditingTenant(false);
+      toast.success('Datos del negocio guardados');
     } catch (e: any) {
-      alert('Error al guardar: ' + e.message);
+      toast.error('Error al guardar: ' + e.message);
     } finally {
       setSavingTenant(false);
     }
@@ -225,21 +230,23 @@ export default function TenantDetailPage() {
         if (error) throw new Error(error.message);
       }
       
-      alert('Usuario actualizado exitosamente');
+      toast.success('Usuario actualizado exitosamente');
       setUserEditModal({ isOpen: false, userId: '', userName: '', userEmail: '', role: '' });
       setNewPassword('');
       setNewEmail('');
       setNewRole('');
       fetchData(); 
     } catch (e: any) {
-      alert('Error: ' + e.message);
+      toast.error('Error: ' + e.message);
     } finally {
       setUpdatingUser(false);
     }
   };
 
-  const handleDeleteUser = async (userId: string, userName: string) => {
-    if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente al usuario ${userName}? Esta acción no se puede deshacer.`)) return;
+  const handleDeleteUser = async () => {
+    if (!userDeleteConfirm) return;
+    const { id: userId, name: userName } = userDeleteConfirm;
+    setUserDeleteConfirm(null);
 
     try {
       const res = await fetch('/api/admin/users/delete', {
@@ -250,11 +257,15 @@ export default function TenantDetailPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error al eliminar usuario');
       
-      alert('Usuario eliminado exitosamente');
+      toast.success(`Usuario "${userName}" eliminado`);
       fetchData();
     } catch (e: any) {
-      alert('Error: ' + e.message);
+      toast.error('Error: ' + e.message);
     }
+  };
+
+  const promptDeleteUser = (id: string, name: string) => {
+    setUserDeleteConfirm({ id, name });
   };
 
   if (loading) {
@@ -300,12 +311,6 @@ export default function TenantDetailPage() {
               </div>
             </div>
           </div>
-          <button
-            onClick={() => { setCurrentTab('info'); setEditingTenant(true); }}
-            className="px-4 py-2 bg-white text-slate-500 text-xs font-black uppercase tracking-widest border border-slate-200 rounded-xl hover:bg-violet-50 hover:text-violet-600 hover:border-violet-200 transition-all flex items-center gap-2 shadow-sm"
-          >
-            <Pencil className="w-3 h-3" /> Editar
-          </button>
         </div>
       </div>
 
@@ -608,7 +613,7 @@ export default function TenantDetailPage() {
                           <UserCog className="w-4 h-4" />
                         </button>
                         <button 
-                          onClick={() => handleDeleteUser(user.id, user.full_name)}
+                          onClick={() => promptDeleteUser(user.id, user.full_name)}
                           className="p-2 bg-slate-100 hover:bg-red-100 text-slate-400 hover:text-red-600 rounded-lg transition-colors"
                           title="Eliminar Usuario"
                         >
@@ -652,55 +657,57 @@ export default function TenantDetailPage() {
                     })()}
                   </div>
 
-                  <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
-                    <div className="grid grid-cols-[180px_1fr_1fr_1fr_1fr_1fr] border-b border-slate-100 bg-slate-50/50">
-                      <div className="py-3.5 pl-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Módulo</div>
-                      {[
-                        { name: 'Administrador', color: 'bg-violet-50 text-violet-600' },
-                        { name: 'Contabilidad', color: 'bg-blue-50 text-blue-600' },
-                        { name: 'Ventas', color: 'bg-emerald-50 text-emerald-600' },
-                        { name: 'Bodega', color: 'bg-orange-50 text-orange-600' },
-                        { name: 'Mercadeo', color: 'bg-pink-50 text-pink-600' },
-                      ].map(({ name, color }) => (
-                        <div key={name} className="py-3.5 flex items-center justify-center">
-                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${color}`}>{name}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {activeModules.length > 0 ? activeModules.map((mod, i) => {
-                      const Icon = moduleIcons[mod.module_key] || Package;
-                      const gradient = moduleColors[mod.module_key] || 'from-slate-500 to-slate-600';
-                      const roles = ['admin', 'accounting', 'seller', 'warehouse', 'marketing'];
-                      return (
-                        <div key={mod.id} className={`grid grid-cols-[180px_1fr_1fr_1fr_1fr_1fr] ${i > 0 ? 'border-t border-slate-100' : ''} hover:bg-slate-50/80 transition-colors`}>
-                          <div className="py-3.5 pl-6 flex items-center gap-3">
-                            <div className={`w-7 h-7 bg-gradient-to-br ${gradient} rounded-lg flex items-center justify-center shadow-sm shrink-0`}>
-                              <Icon className="w-3.5 h-3.5 text-white" strokeWidth={1.5} />
-                            </div>
-                            <span className="font-bold text-slate-700 text-xs">{mod.module_name}</span>
+                  <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-x-auto">
+                    <div className="min-w-[680px]">
+                      <div className="grid grid-cols-[180px_1fr_1fr_1fr_1fr_1fr] border-b border-slate-100 bg-slate-50/50">
+                        <div className="py-3.5 pl-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">Módulo</div>
+                        {[
+                          { name: 'Administrador', color: 'bg-violet-50 text-violet-600' },
+                          { name: 'Contabilidad', color: 'bg-blue-50 text-blue-600' },
+                          { name: 'Ventas', color: 'bg-emerald-50 text-emerald-600' },
+                          { name: 'Bodega', color: 'bg-orange-50 text-orange-600' },
+                          { name: 'Mercadeo', color: 'bg-pink-50 text-pink-600' },
+                        ].map(({ name, color }) => (
+                          <div key={name} className="py-3.5 flex items-center justify-center">
+                            <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${color}`}>{name}</span>
                           </div>
-                          {roles.map(role => {
-                            const perm = rolePermissions.find(p => p.role === role && p.module_key === mod.module_key);
-                            const isActive = perm?.can_access || false;
-                            return (
-                              <div key={`${mod.module_key}-${role}`} className="py-3.5 flex items-center justify-center">
-                                <button
-                                  onClick={() => togglePermission(role, mod.module_key, isActive)}
-                                  className={`relative w-9 h-5 rounded-full transition-all duration-200 ${isActive ? 'bg-emerald-500' : 'bg-slate-200 hover:bg-slate-300'}`}
-                                >
-                                  <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 ${isActive ? 'translate-x-4' : 'translate-x-0'}`} />
-                                </button>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      );
-                    }) : (
-                      <div className="p-12 text-center text-slate-400 font-bold text-sm">
-                        Activa módulos desde la sección de Módulos para configurar permisos.
+                        ))}
                       </div>
-                    )}
+
+                      {activeModules.length > 0 ? activeModules.map((mod, i) => {
+                        const Icon = moduleIcons[mod.module_key] || Package;
+                        const gradient = moduleColors[mod.module_key] || 'from-slate-500 to-slate-600';
+                        const roles = ['admin', 'accounting', 'seller', 'warehouse', 'marketing'];
+                        return (
+                          <div key={mod.id} className={`grid grid-cols-[180px_1fr_1fr_1fr_1fr_1fr] ${i > 0 ? 'border-t border-slate-100' : ''} hover:bg-slate-50/80 transition-colors`}>
+                            <div className="py-3.5 pl-6 flex items-center gap-3">
+                              <div className={`w-7 h-7 bg-gradient-to-br ${gradient} rounded-lg flex items-center justify-center shadow-sm shrink-0`}>
+                                <Icon className="w-3.5 h-3.5 text-white" strokeWidth={1.5} />
+                              </div>
+                              <span className="font-bold text-slate-700 text-xs">{mod.module_name}</span>
+                            </div>
+                            {roles.map(role => {
+                              const perm = rolePermissions.find(p => p.role === role && p.module_key === mod.module_key);
+                              const isActive = perm?.can_access || false;
+                              return (
+                                <div key={`${mod.module_key}-${role}`} className="py-3.5 flex items-center justify-center">
+                                  <button
+                                    onClick={() => togglePermission(role, mod.module_key, isActive)}
+                                    className={`relative w-9 h-5 rounded-full transition-all duration-200 ${isActive ? 'bg-emerald-500' : 'bg-slate-200 hover:bg-slate-300'}`}
+                                  >
+                                    <div className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform duration-200 ${isActive ? 'translate-x-4' : 'translate-x-0'}`} />
+                                  </button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        );
+                      }) : (
+                        <div className="p-12 text-center text-slate-400 font-bold text-sm">
+                          Activa módulos desde la sección de Módulos para configurar permisos.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
@@ -788,6 +795,101 @@ export default function TenantDetailPage() {
             </div>
           </motion.form>
         </div>
+      )}
+
+      {/* User Credentials Modal */}
+      {showUserCredentials && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+        >
+          <motion.div
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-[24px] p-8 max-w-md w-full shadow-2xl space-y-6"
+          >
+            <div className="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto">
+              <UserPlus className="w-7 h-7 text-emerald-600" />
+            </div>
+
+            <div className="text-center">
+              <h3 className="text-xl font-black text-slate-800">Usuario creado</h3>
+              <p className="text-slate-500 text-sm mt-1">Credenciales del nuevo usuario</p>
+            </div>
+
+            <div className="bg-slate-50 rounded-2xl p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Email</span>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(newUser.email); toast.success('Email copiado'); }}
+                  className="text-[10px] font-black text-violet-600 uppercase tracking-widest hover:text-violet-700"
+                >
+                  Copiar
+                </button>
+              </div>
+              <p className="text-sm font-bold text-slate-800 break-all">{newUser.email}</p>
+
+              <div className="border-t border-slate-200 pt-3 flex items-center justify-between">
+                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Contraseña</span>
+                <button
+                  onClick={() => { navigator.clipboard.writeText(newUser.password); toast.success('Contraseña copiada'); }}
+                  className="text-[10px] font-black text-violet-600 uppercase tracking-widest hover:text-violet-700"
+                >
+                  Copiar
+                </button>
+              </div>
+              <p className="text-sm font-bold text-slate-800 font-mono tracking-wider">{newUser.password}</p>
+            </div>
+
+            <button
+              onClick={() => setShowUserCredentials(false)}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black text-sm hover:opacity-90 transition-all shadow-lg shadow-violet-500/20"
+            >
+              Cerrar
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* User Delete Confirm Modal */}
+      {userDeleteConfirm && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          onClick={() => setUserDeleteConfirm(null)}
+        >
+          <motion.div
+            initial={{ scale: 0.92, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-[24px] p-8 max-w-sm w-full shadow-2xl"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="w-12 h-12 bg-red-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-6 h-6 text-red-600" />
+            </div>
+            <h3 className="text-lg font-black text-slate-800 text-center">Eliminar usuario</h3>
+            <p className="text-slate-500 text-sm mt-2 text-center leading-relaxed">
+              ¿Estás seguro de eliminar a <strong className="text-slate-700">{userDeleteConfirm.name}</strong>?
+              Esta acción no se puede deshacer y eliminará su acceso al sistema.
+            </p>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setUserDeleteConfirm(null)}
+                className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-600 text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleDeleteUser}
+                className="flex-1 py-3 rounded-xl bg-red-600 text-white text-xs font-black uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-500/20"
+              >
+                Eliminar
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );

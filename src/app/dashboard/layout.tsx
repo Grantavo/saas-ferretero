@@ -91,7 +91,7 @@ export default function DashboardLayout({
   return (
     <div className="flex min-h-screen bg-[#f8f9ff]">
       <div className="flex-1 flex flex-col relative">
-        <header className="sticky top-0 h-16 flex items-center justify-between px-6 z-50 transition-all duration-300 border-b border-slate-200/50 bg-white/30 backdrop-blur-xl print:hidden">
+        <header className="sticky top-0 h-16 flex items-center justify-between px-4 sm:px-6 z-50 transition-all duration-300 border-b border-slate-200/50 bg-white/30 backdrop-blur-xl print:hidden">
           <div className="flex items-center gap-4">
             <Link 
               href="/dashboard"
@@ -134,7 +134,7 @@ export default function DashboardLayout({
                       initial={{ opacity: 0, y: 8, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                      className="absolute right-0 top-12 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50"
+                      className="absolute right-0 sm:right-auto top-12 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50"
                     >
                       <div className="p-4 border-b border-slate-50 flex items-center justify-between">
                         <p className="font-black text-slate-800 text-sm">Notificaciones</p>
@@ -173,7 +173,7 @@ export default function DashboardLayout({
                       initial={{ opacity: 0, y: 8, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                      className="absolute right-0 top-12 w-64 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50"
+                      className="absolute right-0 sm:right-auto top-12 w-64 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50"
                     >
                       <div className="p-4 border-b border-slate-50">
                         <p className="font-black text-slate-800 text-sm">Actividad Reciente</p>
@@ -221,7 +221,7 @@ export default function DashboardLayout({
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.95 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-14 w-56 bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden z-50"
+                    className="absolute right-0 top-14 w-56 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden z-50"
                   >
                     <div className="p-4 border-b border-slate-50">
                       <p className="font-bold text-slate-800 text-sm">{profile?.full_name || user?.email}</p>
@@ -252,7 +252,7 @@ export default function DashboardLayout({
 
         <main className={cn(
           "flex-1 overflow-auto",
-          isHome ? "p-0" : "p-8",
+          isHome ? "p-0" : "p-4 sm:p-6 lg:p-8",
           "print:p-0"
         )}>
           <div className={cn(isHome ? "max-w-[1600px] mx-auto" : "max-w-7xl mx-auto")}>

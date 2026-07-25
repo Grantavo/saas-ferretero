@@ -154,7 +154,7 @@ export default function NewProductPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Marca</label>
                   <input 
@@ -185,7 +185,7 @@ export default function NewProductPage() {
               <span className="uppercase tracking-widest text-xs font-black">Finanzas e Inventario</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Costo Unitario (Sin IVA)</label>
                 <div className="relative">
@@ -211,7 +211,7 @@ export default function NewProductPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-6 pt-4 border-t border-slate-50">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-slate-50">
               <div className="space-y-2">
                 <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Margen de Utilidad (%)</label>
                 <div className="relative">

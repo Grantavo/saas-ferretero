@@ -128,7 +128,7 @@ export default function Home() {
       </section>
 
       <footer className="border-t py-12 px-8 bg-slate-50">
-        <div className="max-w-7xl mx-auto flex flex-col md:row justify-between items-center gap-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-2">
             <Hammer className="w-5 h-5 text-primary" />
             <span className="font-bold">GrupoJenta</span>
