@@ -63,7 +63,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    console.log('[users-create] Usuario creado exitosamente:', data.user.id);
+    // 3. Crear el perfil manualmente (el trigger fue eliminado)
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .insert({
+        id: data.user.id,
+        full_name: full_name || '',
+        email: email,
+        tenant_id,
+        role: role || 'seller',
+        is_super_admin: false,
+      });
+
+    if (profileError) {
+      console.error('[users-create] Error al crear perfil:', profileError);
+      await supabaseAdmin.auth.admin.deleteUser(data.user.id).catch(() => {});
+      return NextResponse.json({ error: 'Error al crear el perfil del usuario: ' + profileError.message }, { status: 500 });
+    }
+
+    console.log('[users-create] Usuario y perfil creados exitosamente:', data.user.id);
     return NextResponse.json({ success: true, user: data.user });
   } catch (err: any) {
     console.error('[users-create] Unexpected error:', err);

@@ -1,5 +1,31 @@
 # Changelog — Últimos Cambios
 
+## 25/07/2026
+
+### Fix: Perfiles no se creaban al crear usuarios
+- Restaurada la creación manual del perfil en ambas API routes (`create-user`, `users/create`)
+- Causa: el trigger `handle_new_user` no existe en la DB, el workaround de crear perfil manualmente es necesario
+- Agregado `email` al insert del perfil para mostrarlo en el listado de usuarios
+
+### Email visible en listado de usuarios
+- Nueva columna `email` en `profiles` — correr `database/add_email_to_profiles.sql` en Supabase SQL Editor
+- El email se guarda automáticamente al crear nuevos usuarios desde el admin
+- Backfill para usuarios existentes vía `UPDATE profiles SET email = au.email FROM auth.users au`
+
+### PWA — App instalable (manual SW, sin plugins de build)
+- Service worker manual en `public/sw.js` (network-first con fallback a caché, compatible con Turbopack)
+- `public/manifest.json`, iconos SVG, metatags en layout
+- Componente `ServiceWorkerRegister.tsx` para registrar el SW desde el layout
+
+### NIT, Teléfono, Dirección obligatorios
+- `required` en inputs de creación y edición + validación extra en `handleSaveTenant`
+
+### Toggle visibilidad en contraseña temporal
+- Botón Eye/EyeOff al agregar usuario
+
+### Fix: artifacto amarillo en hover
+- Todos los `hover:opacity-90` → `hover:brightness-110`
+
 ## 24/07/2026
 
 ### Fix: Creación de usuarios — constraint duplicado en profiles.role

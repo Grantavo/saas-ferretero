@@ -137,7 +137,7 @@ export default function TenantsListPage() {
         </div>
         <Link
           href="/admin/tenants/new"
-          className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-6 py-3 rounded-2xl font-black flex items-center gap-2 hover:opacity-90 shadow-lg shadow-violet-500/20 transition-all"
+          className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-6 py-3 rounded-2xl font-black flex items-center gap-2 hover:brightness-110 shadow-lg shadow-violet-500/20 transition-all"
         >
           <Plus className="w-5 h-5" /> Nuevo Negocio
         </Link>

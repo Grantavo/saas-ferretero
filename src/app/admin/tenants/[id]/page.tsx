@@ -30,7 +30,9 @@ import {
   Shield,
   Pencil,
   Info,
-  CheckCircle2
+  CheckCircle2,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -86,6 +88,7 @@ export default function TenantDetailPage() {
   const [newPassword, setNewPassword] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newRole, setNewRole] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [updatingUser, setUpdatingUser] = useState(false);
   const [showUserCredentials, setShowUserCredentials] = useState(false);
   const [userDeleteConfirm, setUserDeleteConfirm] = useState<{ id: string; name: string } | null>(null);
@@ -195,6 +198,10 @@ export default function TenantDetailPage() {
   };
 
   const handleSaveTenant = async () => {
+    if (!tenantForm.nit.trim() || !tenantForm.phone.trim() || !tenantForm.address.trim()) {
+      toast.error('NIT, Teléfono y Dirección son obligatorios');
+      return;
+    }
     setSavingTenant(true);
     try {
       const { error } = await supabase.from('tenants').update(tenantForm).eq('id', tenantId);
@@ -380,6 +387,7 @@ export default function TenantDetailPage() {
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">NIT</label>
                       <input 
+                        required
                         type="text"
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-violet-500/20 transition-all"
                         value={tenantForm.nit}
@@ -389,7 +397,8 @@ export default function TenantDetailPage() {
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Teléfono</label>
                       <input 
-                        type="text"
+                        required
+                        type="tel"
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-violet-500/20 transition-all"
                         value={tenantForm.phone}
                         onChange={e => setTenantForm({...tenantForm, phone: e.target.value})}
@@ -398,6 +407,7 @@ export default function TenantDetailPage() {
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Dirección</label>
                       <input 
+                        required
                         type="text"
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-violet-500/20 transition-all"
                         value={tenantForm.address}
@@ -551,10 +561,17 @@ export default function TenantDetailPage() {
                     <div className="relative">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                       <input 
-                        required type="password" placeholder="Contraseña temporal"
-                        className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none focus:ring-2 focus:ring-violet-500/20 shadow-sm"
+                        required type={showPassword ? 'text' : 'password'} placeholder="Contraseña temporal"
+                        className="w-full pl-11 pr-11 py-3 bg-white border border-slate-200 rounded-xl text-slate-800 text-sm outline-none focus:ring-2 focus:ring-violet-500/20 shadow-sm"
                         value={newUser.password} onChange={(e) => setNewUser({...newUser, password: e.target.value})}
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                     <div>
                       <select 
@@ -588,6 +605,7 @@ export default function TenantDetailPage() {
                       </div>
                       <div>
                         <h3 className="font-bold text-slate-800 text-sm">{user.full_name || 'Sin nombre'}</h3>
+                        <p className="text-xs text-slate-500 font-medium mt-0.5">{user.email}</p>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                           {user.role === 'admin' ? 'Administrador' : user.role === 'accounting' ? 'Contabilidad' : user.role === 'seller' ? 'Ventas' : user.role === 'warehouse' ? 'Bodega' : 'Mercadeo'}
                         </p>
@@ -844,7 +862,7 @@ export default function TenantDetailPage() {
 
             <button
               onClick={() => setShowUserCredentials(false)}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black text-sm hover:opacity-90 transition-all shadow-lg shadow-violet-500/20"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black text-sm hover:brightness-110 transition-all shadow-lg shadow-violet-500/20"
             >
               Cerrar
             </button>

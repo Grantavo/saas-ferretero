@@ -161,6 +161,7 @@ export default function NewTenantPage() {
             <div className="space-y-2">
               <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">NIT</label>
               <input 
+                required
                 type="text"
                 placeholder="900.000.000-1"
                 className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-violet-500/20 transition-all font-medium"
@@ -171,7 +172,8 @@ export default function NewTenantPage() {
             <div className="space-y-2">
               <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Teléfono</label>
               <input 
-                type="text"
+                required
+                type="tel"
                 placeholder="310 123 4567"
                 className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-violet-500/20 transition-all font-medium"
                 value={tenantData.phone}
@@ -183,6 +185,7 @@ export default function NewTenantPage() {
           <div className="space-y-2">
             <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">Dirección</label>
             <input 
+              required
               type="text"
               placeholder="Calle 123 #45-67, Bogotá"
               className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-violet-500/20 transition-all font-medium"
@@ -194,7 +197,7 @@ export default function NewTenantPage() {
           <button 
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-4 rounded-2xl font-black text-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-xl shadow-violet-500/20 disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-4 rounded-2xl font-black text-lg hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-xl shadow-violet-500/20 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : 'Siguiente: Crear Usuario →'}
           </button>
@@ -265,7 +268,7 @@ export default function NewTenantPage() {
           <button 
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-4 rounded-2xl font-black text-lg hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-xl shadow-violet-500/20 disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white py-4 rounded-2xl font-black text-lg hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-xl shadow-violet-500/20 disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Save className="w-6 h-6" /> Crear Cuenta Completa</>}
           </button>
@@ -325,7 +328,7 @@ export default function NewTenantPage() {
 
             <button
               onClick={closeCredentials}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black text-sm hover:opacity-90 transition-all shadow-lg shadow-violet-500/20"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 text-white font-black text-sm hover:brightness-110 transition-all shadow-lg shadow-violet-500/20"
             >
               Ir a lista de negocios
             </button>
