@@ -1,6 +1,6 @@
-# SaaS Ferretero
+# SaaS Grupo Jenta
 
-Sistema de gestión empresarial SaaS para ferreterías. Inventario, punto de venta (POS), reportes y más, todo desde un solo software.
+Sistema de gestión empresarial SaaS para Negocios. Inventario, punto de venta (POS), reportes y más, todo desde un solo software.
 
 ## Características
 
