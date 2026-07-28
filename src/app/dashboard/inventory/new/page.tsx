@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { calculateBasePrice, calculateFinalPrice } from '@/lib/pricing';
 import { 
   Package, 
   Tag, 
@@ -40,8 +41,7 @@ export default function NewProductPage() {
   useEffect(() => {
     const cost = Number(formData.cost_price) || 0;
     const margin = Number(formData.margin_percentage) || 0;
-    const price = cost * (1 + margin / 100);
-    setFormData(prev => ({ ...prev, base_price: Math.round(price) }));
+    setFormData(prev => ({ ...prev, base_price: calculateBasePrice(cost, margin) }));
   }, [formData.cost_price, formData.margin_percentage]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -228,7 +228,7 @@ export default function NewProductPage() {
                 <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Precio Sugerido (Con IVA)</label>
                 <div className="w-full px-6 py-4 bg-slate-900 rounded-2xl text-white font-black text-xl flex items-center justify-between">
                   <span className="text-[10px] text-slate-400 uppercase tracking-widest">Final</span>
-                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(formData.base_price * (1 + formData.tax_percentage/100))}
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(calculateFinalPrice(formData.base_price, formData.tax_percentage))}
                 </div>
               </div>
             </div>

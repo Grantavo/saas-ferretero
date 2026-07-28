@@ -3,7 +3,8 @@
 import { useState, useEffect, use } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
-import { 
+import { calculateFinalPrice } from '@/lib/pricing';
+import {
   ArrowLeft, 
   Package, 
   Barcode, 
@@ -114,9 +115,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   useEffect(() => {
     const base = parseFloat(formData.base_price) || 0;
-    const calculatedTax = base * (formData.tax_percentage / 100);
-    setTaxAmount(calculatedTax);
-    setTotalWithTax(base + calculatedTax);
+    const total = calculateFinalPrice(base, formData.tax_percentage);
+    setTaxAmount(total - base);
+    setTotalWithTax(total);
   }, [formData.base_price, formData.tax_percentage]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
