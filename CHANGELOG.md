@@ -1,5 +1,8 @@
 # Changelog — Últimos Cambios
 
+### Docs: se agrega NOTAS_DESARROLLO.md con tips de flujo de trabajo y lecciones aprendidas
+- Nuevo archivo con tips de terminal Windows, gotchas de Next.js 16, flujo git+dev, patrones de Supabase, seguridad y checklist de QA
+
 ### Fix: public/sw.js ahora se trackea en git
 - Eliminado `public/sw.js` de `.gitignore`
 - Antes el SW nunca se subía al repo ni se desplegaba a Vercel → 404 en `/sw.js` en producción
