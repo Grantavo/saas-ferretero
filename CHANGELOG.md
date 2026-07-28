@@ -1,6 +1,42 @@
 # Changelog — Últimos Cambios
 
+### Fix: se mueve themeColor de metadata a viewport export (Next.js API actual)
+- Importado `Viewport` type junto a `Metadata` desde `next`
+- `themeColor: "#7C3AED"` movido de `export const metadata` a `export const viewport`
+- Sin cambio visual, elimina warning de deprecación en servidor
+
+### Chore: migración de middleware.ts a proxy.ts (convención Next.js 16)
+- `src/middleware.ts` → `src/proxy.ts` via `git mv`
+- `export async function middleware()` → `export async function proxy()`
+- Sin cambios en lógica, imports, rutas públicas, matcher ni cookies
+- Build ya no muestra el warning de deprecación del middleware
+
+### Test: se extrae lógica de cálculo de precios a src/lib/pricing.ts
+- Nuevas funciones puras `calculateBasePrice` y `calculateFinalPrice` en `src/lib/pricing.ts`
+- `inventory/new/page.tsx`: useEffect y display de precio final ahora llaman a las funciones
+- `inventory/edit/[id]/page.tsx`: useEffect de IVA usa `calculateFinalPrice`, mantiene dos estados
+- Vitest instalado como devDependency, 8 tests unitarios pasando
+- Sin cambios de comportamiento numérico
+
 ## 25/07/2026
+
+### Fix: se reduce logging con datos personales en rutas admin
+- Eliminados `console.log` que exponían email, tenant_id y user.id en texto plano
+- Todos los `console.error` ahora registran solo `error.message` en vez del objeto completo
+- `delete-tenant` ya no registra `p.id` del usuario al fallar borrado
+- Mensajes preservados: `Missing SUPABASE_SERVICE_ROLE_KEY` (sin datos personales)
+
+### Fix: tipado seguro de errores (unknown) en rutas de API admin
+- Reemplazados 5 `catch (err: any)` por `catch (err: unknown)` en los catch blocks
+- Usa `err instanceof Error ? err.message : 'Error interno del servidor'` para mensajes
+- Rutas afectadas: `create-user`, `delete-tenant`, `users/create`, `users/delete`, `users/password`
+- Sin cambio de comportamiento observable
+
+### Refactor: helper compartido requireSuperAdmin()
+- Extraído el bloque duplicado de verificación de sesión + super admin en 5 rutas API
+- Nuevo helper `src/lib/supabase/requireSuperAdmin.ts`
+- Rutas afectadas: `create-user`, `delete-tenant`, `users/create`, `users/delete`, `users/password`
+- Sin cambio de comportamiento: mismos mensajes y status codes que cada ruta tenía
 
 ### Fix: Perfiles no se creaban al crear usuarios
 - Restaurada la creación manual del perfil en ambas API routes (`create-user`, `users/create`)

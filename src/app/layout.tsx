@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { UserProvider } from "@/providers/UserContext";
@@ -14,12 +14,15 @@ export const metadata: Metadata = {
   title: "GrupoJenta",
   description: "La plataforma de gestión de negocios.",
   manifest: "/manifest.json",
-  themeColor: "#7C3AED",
   appleWebApp: {
     capable: true,
     title: "GrupoJenta",
     statusBarStyle: "default",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#7C3AED",
 };
 
 export default function RootLayout({
