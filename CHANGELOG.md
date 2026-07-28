@@ -1,5 +1,15 @@
 # Changelog — Últimos Cambios
 
+### Fix: public/sw.js ahora se trackea en git
+- Eliminado `public/sw.js` de `.gitignore`
+- Antes el SW nunca se subía al repo ni se desplegaba a Vercel → 404 en `/sw.js` en producción
+- Sin cambios en el contenido del archivo
+
+### Fix: se excluyen /sw.js y /manifest.json del proxy de autenticación
+- Agregados `sw.js` y `manifest.json` al matcher del proxy
+- Corrige SecurityError al registrar Service Worker sin sesión activa
+- Sin cambio en rutas protegidas (login/redirect sigue igual)
+
 ### Fix: se mueve themeColor de metadata a viewport export (Next.js API actual)
 - Importado `Viewport` type junto a `Metadata` desde `next`
 - `themeColor: "#7C3AED"` movido de `export const metadata` a `export const viewport`

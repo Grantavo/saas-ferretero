@@ -52,9 +52,6 @@ ejecutar_comandos.md
 reglas_de_cambio.md
 NEXT_SESSION.md
 
-# generated
-public/sw.js
-
 # diagnostic SQL
 database/fix_trigger_profiles.sql
 database/remove_trigger_profiles.sql
