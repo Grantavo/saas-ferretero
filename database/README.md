@@ -23,3 +23,5 @@ Los siguientes archivos existen en el repo pero **no tienen historial de ejecuci
 ## ⚠️ Advertencia importante
 
 Antes de correr un `ALTER TABLE ... ADD CONSTRAINT`, verificar con `\d+ nombre_tabla` en el SQL Editor si ya existe una constraint con ese propósito, para evitar el bug de **constraints duplicadas** ya ocurrido en `profiles.role`.
+
+<!-- preview deployment test -->
