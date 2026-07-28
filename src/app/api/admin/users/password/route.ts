@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { requireSuperAdmin } from '@/lib/supabase/requireSuperAdmin';
 
 export async function POST(request: Request) {
   try {
@@ -35,21 +36,8 @@ export async function POST(request: Request) {
       }
     );
 
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-
-    if (!currentUser) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_super_admin')
-      .eq('id', currentUser.id)
-      .single();
-
-    if (!profile?.is_super_admin) {
-      return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 });
-    }
+    const auth = await requireSuperAdmin(supabase, { forbidden: 'Acceso denegado' });
+    if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
     // 2. Usar service_role key para cambiar la contraseña
     const supabaseAdmin = createSupabaseAdmin(
@@ -71,7 +59,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error interno del servidor';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

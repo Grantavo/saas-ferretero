@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { requireSuperAdmin } from '@/lib/supabase/requireSuperAdmin';
 
 export async function DELETE(request: Request) {
   try {
@@ -23,22 +24,8 @@ export async function DELETE(request: Request) {
       }
     );
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
-
-    // 2. Verificar que el usuario sea Super Admin
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_super_admin')
-      .eq('id', user.id)
-      .single();
-
-    if (!profile?.is_super_admin) {
-      return NextResponse.json({ error: 'Permisos insuficientes' }, { status: 403 });
-    }
+    const auth = await requireSuperAdmin(supabase);
+    if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
     // 3. Obtener el ID del tenant a eliminar
     const url = new URL(request.url);
@@ -69,7 +56,7 @@ export async function DELETE(request: Request) {
       for (const p of profilesToDelete) {
         const { error: deleteUserError } = await supabaseAdmin.auth.admin.deleteUser(p.id);
         if (deleteUserError) {
-          console.error(`Error deleting auth user ${p.id}:`, deleteUserError);
+          console.error('Error deleting auth user:', deleteUserError.message);
           // Opcionalmente podrías detenerte aquí, pero es mejor intentar borrar la mayor cantidad posible
         }
       }
@@ -87,8 +74,9 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ success: true });
 
-  } catch (error: any) {
-    console.error('Error in delete-tenant route:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Error interno del servidor';
+    console.error('Error in delete-tenant route:', message);
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

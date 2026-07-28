@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createClient as createServerClient } from '@/lib/supabase/server';
+import { requireSuperAdmin } from '@/lib/supabase/requireSuperAdmin';
 
 export async function POST(request: Request) {
   try {
@@ -17,21 +18,8 @@ export async function POST(request: Request) {
 
     // 1. Verificar que el que hace la petición es super admin
     const supabase = await createServerClient();
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-
-    if (!currentUser) {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-    }
-
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_super_admin')
-      .eq('id', currentUser.id)
-      .single();
-
-    if (!profile?.is_super_admin) {
-      return NextResponse.json({ error: 'Permisos insuficientes' }, { status: 403 });
-    }
+    const auth = await requireSuperAdmin(supabase);
+    if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
     // 2. Usar service_role key para crear el usuario
     const supabaseAdmin = createClient(
@@ -44,8 +32,6 @@ export async function POST(request: Request) {
         },
       }
     );
-
-    console.log('[create-user] Creating user for tenant:', tenant_id, 'email:', email);
 
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -60,7 +46,7 @@ export async function POST(request: Request) {
     });
 
     if (error) {
-      console.error('[create-user] Supabase admin.createUser error:', error.message, error);
+      console.error('[create-user] admin.createUser error:', error.message);
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
@@ -77,16 +63,16 @@ export async function POST(request: Request) {
       });
 
     if (profileError) {
-      console.error('[create-user] Error al crear perfil:', profileError);
+      console.error('[create-user] Error al crear perfil:', profileError.message);
       await supabaseAdmin.auth.admin.deleteUser(data.user.id).catch(() => {});
       return NextResponse.json({ error: 'Error al crear el perfil del usuario: ' + profileError.message }, { status: 500 });
     }
 
-    console.log('[create-user] Usuario y perfil creados exitosamente:', data.user.id);
     return NextResponse.json({ success: true, user: data.user });
 
-  } catch (err: any) {
-    console.error('[create-user] Unexpected error:', err);
-    return NextResponse.json({ error: err.message || 'Error interno del servidor' }, { status: 500 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Error interno del servidor';
+    console.error('[create-user] Unexpected error:', message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
