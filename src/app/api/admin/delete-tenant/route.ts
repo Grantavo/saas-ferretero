@@ -3,11 +3,22 @@ import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { requireSuperAdmin } from '@/lib/supabase/requireSuperAdmin';
+import { rateLimit, clientIp } from '@/lib/security/rateLimit';
 
 export async function DELETE(request: Request) {
   try {
     const cookieStore = await cookies();
-    
+
+    // 0. Rate limiting por IP (ruta destructiva de admin).
+    const ip = clientIp(request);
+    const limit = rateLimit(`admin-delete-tenant:${ip}`);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: `Demasiados intentos. Intente en ${limit.retryAfterSec}s.` },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfterSec) } }
+      );
+    }
+
     // 1. Verificar sesión actual del usuario que hace la petición
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -26,6 +37,7 @@ export async function DELETE(request: Request) {
 
     const auth = await requireSuperAdmin(supabase);
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const actor = auth.user!;
 
     // 3. Obtener el ID del tenant a eliminar
     const url = new URL(request.url);
@@ -34,6 +46,17 @@ export async function DELETE(request: Request) {
     if (!tenantId) {
       return NextResponse.json({ error: 'Falta el ID del tenant' }, { status: 400 });
     }
+
+    // 3.5 Auditoría antes de la acción destructiva.
+    const { error: auditError } = await supabase
+      .from('audit_log')
+      .insert({
+        actor_id: actor.id,
+        action: 'tenant.delete',
+        target_type: 'tenants',
+        target_id: tenantId,
+      });
+    if (auditError) console.error('[delete-tenant] audit insert:', auditError.message);
 
     // 4. Inicializar el cliente Admin (con Service Role Key)
     const supabaseAdmin = createSupabaseAdmin(

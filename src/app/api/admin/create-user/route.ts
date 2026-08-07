@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { requireSuperAdmin } from '@/lib/supabase/requireSuperAdmin';
+import { validatePassword } from '@/lib/validation/password';
+import { rateLimit, clientIp } from '@/lib/security/rateLimit';
 
 export async function POST(request: Request) {
   try {
@@ -11,15 +13,41 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Faltan datos obligatorios' }, { status: 400 });
     }
 
+    // Política de contraseña (punto 9).
+    const pwError = validatePassword(password);
+    if (pwError) return NextResponse.json({ error: pwError }, { status: 400 });
+
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
       console.error('[create-user] Missing SUPABASE_SERVICE_ROLE_KEY');
       return NextResponse.json({ error: 'Error de configuración del servidor' }, { status: 500 });
+    }
+
+    // Rate limiting por IP.
+    const ip = clientIp(request);
+    const limit = rateLimit(`admin-create-user:${ip}`);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: `Demasiados intentos. Intente en ${limit.retryAfterSec}s.` },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfterSec) } }
+      );
     }
 
     // 1. Verificar que el que hace la petición es super admin
     const supabase = await createServerClient();
     const auth = await requireSuperAdmin(supabase);
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const actor = auth.user!;
+
+    // 1.1. Auditoría.
+    const { error: auditError } = await supabase
+      .from('audit_log')
+      .insert({
+        actor_id: actor.id,
+        action: 'user.create',
+        target_type: 'auth.users',
+        metadata: { email, role, tenant_id },
+      });
+    if (auditError) console.error('[create-user] audit insert:', auditError.message);
 
     // 2. Usar service_role key para crear el usuario
     const supabaseAdmin = createClient(

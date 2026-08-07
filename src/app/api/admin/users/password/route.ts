@@ -3,6 +3,8 @@ import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { requireSuperAdmin } from '@/lib/supabase/requireSuperAdmin';
+import { validatePassword } from '@/lib/validation/password';
+import { rateLimit, clientIp } from '@/lib/security/rateLimit';
 
 export async function POST(request: Request) {
   try {
@@ -14,8 +16,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Faltan datos requeridos.' }, { status: 400 });
     }
 
+    // Política de contraseña (punto 9).
+    if (newPassword) {
+      const pwError = validatePassword(newPassword);
+      if (pwError) return NextResponse.json({ error: pwError }, { status: 400 });
+    }
+
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
       return NextResponse.json({ error: 'El servidor no tiene configurada la SUPABASE_SERVICE_ROLE_KEY.' }, { status: 500 });
+    }
+
+    // Rate limiting por IP (punto 9).
+    const ip = clientIp(request);
+    const limit = rateLimit(`admin-user-password:${ip}`);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: `Demasiados intentos. Intente en ${limit.retryAfterSec}s.` },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfterSec) } }
+      );
     }
 
     // 1. Verificar que el que hace la petición es super admin
@@ -38,6 +56,18 @@ export async function POST(request: Request) {
 
     const auth = await requireSuperAdmin(supabase, { forbidden: 'Acceso denegado' });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const actor = auth.user!;
+
+    // 1.1. Auditoría (punto 10).
+    const { error: auditError } = await supabase
+      .from('audit_log')
+      .insert({
+        actor_id: actor.id,
+        action: 'user.password_update',
+        target_type: 'auth.users',
+        metadata: { userId },
+      });
+    if (auditError) console.error('[users-password] audit insert:', auditError.message);
 
     // 2. Usar service_role key para cambiar la contraseña
     const supabaseAdmin = createSupabaseAdmin(

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { requireSuperAdmin } from '@/lib/supabase/requireSuperAdmin';
+import { validatePassword } from '@/lib/validation/password';
+import { rateLimit, clientIp } from '@/lib/security/rateLimit';
 
 export async function POST(request: Request) {
   try {
@@ -11,14 +13,40 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Faltan datos requeridos.' }, { status: 400 });
     }
 
+    // Política de contraseña (punto 9).
+    const pwError = validatePassword(password);
+    if (pwError) return NextResponse.json({ error: pwError }, { status: 400 });
+
     if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
       return NextResponse.json({ error: 'El servidor no tiene configurada la SUPABASE_SERVICE_ROLE_KEY.' }, { status: 500 });
+    }
+
+    // Rate limiting por IP (punto 9) — ruta sensible de admin.
+    const ip = clientIp(request);
+    const limit = rateLimit(`admin-user-create:${ip}`);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: `Demasiados intentos. Intente en ${limit.retryAfterSec}s.` },
+        { status: 429, headers: { 'Retry-After': String(limit.retryAfterSec) } }
+      );
     }
 
     // 1. Verificar que el que hace la petición es super admin
     const supabaseServer = await createServerClient();
     const auth = await requireSuperAdmin(supabaseServer, { forbidden: 'Acceso denegado' });
     if (auth.error) return NextResponse.json({ error: auth.error }, { status: auth.status });
+    const actor = auth.user!;
+
+    // 1.1. Auditoría (punto 10): antes de actuar, dejar registro del admin.
+    const { error: auditError } = await supabaseServer
+      .from('audit_log')
+      .insert({
+        actor_id: actor.id,
+        action: 'user.create',
+        target_type: 'auth.users',
+        metadata: { email, role, tenant_id },
+      });
+    if (auditError) console.error('[users-create] audit insert:', auditError.message);
 
     // 2. Usar service_role key para crear el usuario
     const supabaseAdmin = createClient(
