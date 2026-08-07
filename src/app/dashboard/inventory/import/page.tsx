@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
 import { 
   FileSpreadsheet, 
@@ -13,66 +12,40 @@ import {
   Info
 } from 'lucide-react';
 import Link from 'next/link';
-import * as XLSX from 'xlsx';
 
 export default function ImportPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ success: number; errors: number } | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setFileName(file.name);
+    setError(null);
     setLoading(true);
-    const supabase = createClient();
 
     try {
-      const { data: tenant } = await supabase.from('tenants').select('id').limit(1).single();
-      if (!tenant) throw new Error('No se encontró una ferretería configurada.');
+      // El parsing y la inserción ocurren en el servidor
+      // (src/app/api/dashboard/inventory/import/route.ts), donde el
+      // tenant se deriva de la sesión autenticada y nunca se confía
+      // en valores enviados por el cliente.
+      const formData = new FormData();
+      formData.append('file', file);
 
-      const reader = new FileReader();
-      reader.onload = async (evt) => {
-        const bstr = evt.target?.result;
-        const wb = XLSX.read(bstr, { type: 'binary' });
-        const wsname = wb.SheetNames[0];
-        const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json(ws);
+      const res = await fetch('/api/dashboard/inventory/import', { method: 'POST', body: formData });
+      const data = await res.json();
 
-        let successCount = 0;
-        let errorCount = 0;
-
-        // Procesar en bloques para evitar saturar la API
-        for (let i = 0; i < data.length; i += 50) {
-          const chunk = data.slice(i, i + 50).map((row: any) => ({
-            tenant_id: tenant.id,
-            name: row.nombre || row.Nombre || row.name,
-            brand: row.marca || row.Marca || row.brand || '',
-            category: row.categoria || row.Categoria || row.category || 'General',
-            barcode: row.codigo_barras || row.barcode || '',
-            sku: row.sku || row.SKU || '',
-            base_price: parseFloat(row.precio_base || row.precio || 0),
-            tax_percentage: parseFloat(row.iva || 19),
-            stock: parseInt(row.stock || row.existencias || 0),
-            min_stock: parseInt(row.stock_minimo || 5)
-          }));
-
-          const { error } = await supabase.from('products').insert(chunk);
-          if (error) {
-            console.error('Error en bloque:', error);
-            errorCount += chunk.length;
-          } else {
-            successCount += chunk.length;
-          }
-        }
-
-        setResult({ success: successCount, errors: errorCount });
-        setLoading(false);
-      };
-      reader.readAsBinaryString(file);
-    } catch (error: any) {
-      alert('Error al procesar el archivo: ' + error.message);
+      if (!res.ok) {
+        setError(data.error || 'Error al procesar el archivo.');
+      } else {
+        setResult({ success: data.success, errors: data.errors });
+      }
+    } catch (err: any) {
+      setError('Error al procesar el archivo: ' + (err?.message || 'error desconocido'));
+    } finally {
       setLoading(false);
     }
   };
@@ -117,6 +90,13 @@ export default function ImportPage() {
                 </p>
               </div>
             </div>
+
+            {error && (
+              <div className="flex items-center gap-2 justify-center text-red-600 text-sm font-medium">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
 
             <div className="relative group">
               <input 
