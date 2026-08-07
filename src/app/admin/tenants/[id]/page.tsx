@@ -136,6 +136,33 @@ export default function TenantDetailPage() {
     setLoading(false);
   }
 
+  const grantAdminPermission = async (moduleKey: string) => {
+    const existingPerm = rolePermissions.find(p => p.role === 'admin' && p.module_key === moduleKey);
+
+    if (existingPerm) {
+      if (!existingPerm.can_access) {
+        await supabase
+          .from('role_permissions')
+          .update({ can_access: true })
+          .eq('id', existingPerm.id);
+
+        setRolePermissions(rolePermissions.map(p =>
+          p.id === existingPerm.id ? { ...p, can_access: true } : p
+        ));
+      }
+    } else {
+      const { data } = await supabase
+        .from('role_permissions')
+        .insert({ tenant_id: tenantId, role: 'admin', module_key: moduleKey, can_access: true })
+        .select()
+        .single();
+
+      if (data) {
+        setRolePermissions([...rolePermissions, data]);
+      }
+    }
+  };
+
   const toggleModule = async (moduleId: string, currentState: boolean) => {
     await supabase
       .from('tenant_modules')
@@ -145,6 +172,15 @@ export default function TenantDetailPage() {
     setModules(modules.map(m => 
       m.id === moduleId ? { ...m, is_active: !currentState } : m
     ));
+
+    // Al activar un módulo, conceder automáticamente acceso al rol admin.
+    // El resto de roles los configura el admin manualmente en la matriz de permisos.
+    if (!currentState) {
+      const module = modules.find(m => m.id === moduleId);
+      if (module?.module_key) {
+        await grantAdminPermission(module.module_key);
+      }
+    }
   };
 
   const togglePermission = async (role: string, moduleKey: string, currentState: boolean) => {
