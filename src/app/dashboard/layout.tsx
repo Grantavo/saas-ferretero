@@ -89,8 +89,8 @@ export default function DashboardLayout({
   if (!mounted || loading) return <div className="min-h-screen bg-[#f8f9ff]" />;
 
   return (
-    <div className="flex min-h-screen bg-[#f8f9ff]">
-      <div className="flex-1 flex flex-col relative">
+    <div className="flex h-screen bg-[#f8f9ff] overflow-hidden">
+      <div className="flex-1 flex flex-col relative min-w-0">
         <header className="sticky top-0 h-16 flex items-center justify-between px-4 sm:px-6 z-50 transition-all duration-300 border-b border-slate-200/50 bg-white/30 backdrop-blur-xl print:hidden">
           <div className="flex items-center gap-4">
             <Link 
@@ -251,7 +251,7 @@ export default function DashboardLayout({
         </header>
 
         <main className={cn(
-          "flex-1 overflow-auto",
+          "flex-1 overflow-y-auto overflow-x-clip",
           isHome ? "p-0" : "p-4 sm:p-6 lg:p-8",
           "print:p-0"
         )}>

@@ -76,8 +76,13 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    overflow-x: clip;
+  }
+
   body {
     @apply bg-background text-foreground transition-colors duration-300;
+    overflow-x: clip;
   }
 
   /* Ocultar flechas de inputs numéricos globalmente */

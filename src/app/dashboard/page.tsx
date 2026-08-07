@@ -83,29 +83,24 @@ export default function DashboardPage() {
           .eq('role', profile.role || 'admin'),
       ]);
 
-      if (!modulesRes.error && modulesRes.data) {
-        let filtered = modulesRes.data;
-        if (permsRes.data && permsRes.data.length > 0) {
-          const allowedKeys = new Set(
-            permsRes.data.filter(p => p.can_access).map(p => p.module_key)
-          );
-          filtered = modulesRes.data.filter(m => allowedKeys.has(m.module_key));
-        }
-        setModules(filtered);
-      } else {
-        setModules([
-          { module_key: 'inventory', module_name: 'Inventario', is_active: true },
-          { module_key: 'pos', module_name: 'Punto de Venta', is_active: true },
-          { module_key: 'sales', module_name: 'Ventas', is_active: true },
-          { module_key: 'customers', module_name: 'Clientes', is_active: true },
-          { module_key: 'payments', module_name: 'Pagos', is_active: true },
-          { module_key: 'history', module_name: 'Historial', is_active: true },
-          { module_key: 'chat', module_name: 'Conversaciones', is_active: true },
-          { module_key: 'calendar', module_name: 'Calendario', is_active: true },
-          { module_key: 'tasks', module_name: 'Tareas', is_active: true },
-          { module_key: 'settings', module_name: 'Ajustes', is_active: true },
-        ]);
+      if (modulesRes.error || !modulesRes.data) {
+        // Sin fallback hardcodeado: si falla la consulta, estado vacío.
+        setModules([]);
+        setModulesLoading(false);
+        return;
       }
+
+      // Intersección estricta: el dashboard muestra SOLO los módulos activos
+      // que el rol del usuario tiene permitidos (ni uno más ni uno menos).
+      // Si el rol no tiene permisos registrados, no ve nada.
+      const allowedKeys = new Set(
+        (permsRes.data || []).filter(p => p.can_access).map(p => p.module_key)
+      );
+      const filtered = (permsRes.data && permsRes.data.length > 0)
+        ? modulesRes.data.filter(m => allowedKeys.has(m.module_key))
+        : [];
+
+      setModules(filtered);
       setModulesLoading(false);
     }
 
@@ -116,45 +111,61 @@ export default function DashboardPage() {
 
   if (loading || modulesLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f8f9ff] via-[#f1f4ff] to-[#eef2ff]">
+      <div className="min-h-[calc(100dvh-64px)] flex items-center justify-center bg-gradient-to-br from-[#f8f9ff] via-[#f1f4ff] to-[#eef2ff]">
         <Loader2 className="w-10 h-10 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f8f9ff] via-[#f1f4ff] to-[#eef2ff] p-8 md:p-16">
+    <div className="min-h-[calc(100dvh-64px)] bg-gradient-to-br from-[#f8f9ff] via-[#f1f4ff] to-[#eef2ff] p-8 md:p-16 overflow-x-clip">
       <div className="max-w-6xl mx-auto">
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-12"
-        >
-          {modules.map((mod, i) => {
-            const Icon = moduleIconMap[mod.module_key] || Package;
-            const color = moduleColorMap[mod.module_key] || 'bg-slate-500';
-            const href = moduleHrefMap[mod.module_key] || '/dashboard';
+        {modules.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-center text-center py-24 gap-3"
+          >
+            <LayoutGrid className="w-12 h-12 text-slate-300" />
+            <p className="text-lg font-semibold text-slate-600">
+              No tienes módulos habilitados
+            </p>
+            <p className="text-sm text-slate-400 max-w-sm">
+              Contacta al administrador del negocio para que te habilite acceso a las aplicaciones activas.
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-wrap justify-center gap-x-8 gap-y-12"
+          >
+            {modules.map((mod, i) => {
+              const Icon = moduleIconMap[mod.module_key] || Package;
+              const color = moduleColorMap[mod.module_key] || 'bg-slate-500';
+              const href = moduleHrefMap[mod.module_key] || '/dashboard';
 
-            return (
-              <motion.div
-                key={mod.module_key}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.03 }}
-              >
-                <Link href={href} className="flex flex-col items-center group">
-                  <div className={`w-20 h-20 md:w-24 md:h-24 ${color} rounded-[28%] flex items-center justify-center shadow-xl shadow-slate-200 group-hover:scale-110 group-active:scale-95 transition-all duration-300 relative overflow-hidden`}>
-                    <div className="absolute inset-0 bg-white/10 group-hover:bg-transparent transition-colors" />
-                    <Icon className="w-10 h-10 md:w-12 md:h-12 text-white" strokeWidth={1.5} />
-                  </div>
-                  <span className="mt-4 text-sm font-semibold text-slate-700 tracking-wide text-center">
-                    {mod.module_name}
-                  </span>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </motion.div>
+              return (
+                <motion.div
+                  key={mod.module_key}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.03 }}
+                >
+                  <Link href={href} className="flex flex-col items-center group">
+                    <div className={`w-20 h-20 md:w-24 md:h-24 ${color} rounded-[28%] flex items-center justify-center shadow-xl shadow-slate-200 group-hover:scale-110 group-active:scale-95 transition-all duration-300 relative overflow-hidden`}>
+                      <div className="absolute inset-0 bg-white/10 group-hover:bg-transparent transition-colors" />
+                      <Icon className="w-10 h-10 md:w-12 md:h-12 text-white" strokeWidth={1.5} />
+                    </div>
+                    <span className="mt-4 text-sm font-semibold text-slate-700 tracking-wide text-center">
+                      {mod.module_name}
+                    </span>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        )}
       </div>
     </div>
   );
