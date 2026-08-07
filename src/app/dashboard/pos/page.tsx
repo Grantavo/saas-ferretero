@@ -187,6 +187,31 @@ export default function POSPage() {
     window.print();
   };
 
+  const handleCheckout = async () => {
+    if (processing || cart.length === 0) return;
+
+    setProcessing(true);
+    try {
+      const items = cart.map(item => ({ product_id: item.id, quantity: item.quantity }));
+
+      const { data: saleId, error } = await supabase.rpc('record_sale', {
+        p_items: items,
+        p_payment_method: 'cash',
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
+
+      handlePrint();
+      toast.success('Factura procesada correctamente');
+      setCart([]);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(val);
   };
@@ -446,11 +471,11 @@ export default function POSPage() {
             <div className="pt-8 flex gap-3 no-print">
               {docType === 'sale' ? (
                 <button 
-                  onClick={() => { handlePrint(); toast.success('Factura procesada correctamente'); }} 
-                  disabled={cart.length === 0} 
+                  onClick={handleCheckout} 
+                  disabled={cart.length === 0 || processing} 
                   className="flex-1 py-5 bg-[#e2e8f0] text-black border border-[#cbd5e1] rounded-[24px] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-white transition-all shadow-sm disabled:opacity-50"
                 >
-                  <Save className="w-5 h-5" /> Facturar
+                  {processing ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />} {processing ? 'Guardando...' : 'Facturar'}
                 </button>
               ) : (
                 <>
