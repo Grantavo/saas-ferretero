@@ -1,5 +1,10 @@
 # Changelog — Últimos Cambios
 
+## [dev] 08/08/2026
+
+### Dependencias — Next.js 16.3.0
+- `next` actualizado de `16.2.6` a `16.3.0` (exacto, estilo del repo) — cierra las CVEs de `sharp` (<0.35.0, GHSA-f88m-g3jw-g9cj) y `postcss` (<=8.5.22, GHSA-qx2v-qp2m-jg93 / GHSA-r28c-9q8g-f849 / GHSA-fxqj-rqcc-2cmp).
+
 ## [dev] 06/08/2026
 
 ### Seguridad — remisión de auditoría (10 hallazgos, en marcha)
