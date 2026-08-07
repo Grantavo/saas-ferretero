@@ -50,6 +50,13 @@ export default function POSPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [customerSearch, setCustomerSearch] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [customerOpen, setCustomerOpen] = useState(false);
+  const [customerFocused, setCustomerFocused] = useState(0);
+  const customerBoxRef = useRef<HTMLDivElement | null>(null);
+  const [productSearch, setProductSearch] = useState('');
+  const [productOpen, setProductOpen] = useState(false);
+  const [productFocused, setProductFocused] = useState(0);
+  const productBoxRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [docType, setDocType] = useState<'sale' | 'quote'>('quote');
@@ -86,19 +93,91 @@ export default function POSPage() {
     toast.success(`${product.name} añadido`);
   };
 
-  const removeFromCart = (id: string) => {
-    setCart(prev => prev.filter(item => item.id !== id));
+  const updateQuantity = (id: string, newQty: number) => {
+    setCart(prev => prev.map(item =>
+      item.id === id ? { ...item, quantity: Math.max(1, newQty) } : item
+    ));
   };
 
-  const updateQuantity = (id: string, newQty: number) => {
-    setCart(prev => prev.map(item => 
-      item.id === id ? { ...item, quantity: Math.max(0, newQty) } : item
-    ));
+  const removeFromCart = (id: string) => {
+    setCart(prev => prev.filter(item => item.id !== id));
   };
 
   const subtotal = cart.reduce((acc, item) => acc + (item.base_price * item.quantity), 0);
   const tax = cart.reduce((acc, item) => acc + (item.base_price * (item.tax_percentage / 100) * item.quantity), 0);
   const total = subtotal + tax;
+  const effectiveIvaRate = subtotal > 0 ? Math.round((tax / subtotal) * 100) : 0;
+
+  const filteredCustomers = customers.filter(c =>
+    c.full_name?.toLowerCase().includes(customerSearch.toLowerCase()) ||
+    c.nit?.toLowerCase().includes(customerSearch.toLowerCase())
+  );
+
+  const filteredProducts = products.filter(p =>
+    p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
+    p.brand?.toLowerCase().includes(productSearch.toLowerCase())
+  );
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (customerBoxRef.current && !customerBoxRef.current.contains(e.target as Node)) {
+        setCustomerOpen(false);
+      }
+      if (productBoxRef.current && !productBoxRef.current.contains(e.target as Node)) {
+        setProductOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    setCustomerFocused(0);
+  }, [customerSearch, customerOpen]);
+
+  useEffect(() => {
+    setProductFocused(0);
+  }, [productSearch, productOpen]);
+
+  const handleCustomerKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setCustomerOpen(true);
+      setCustomerFocused((f) => (filteredCustomers.length ? (f + 1) % filteredCustomers.length : 0));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setCustomerFocused((f) => (filteredCustomers.length ? (f - 1 + filteredCustomers.length) % filteredCustomers.length : 0));
+    } else if (e.key === 'Enter') {
+      if (filteredCustomers[customerFocused]) {
+        setSelectedCustomer(filteredCustomers[customerFocused]);
+        setCustomerSearch('');
+        setCustomerOpen(false);
+      }
+    } else if (e.key === 'Escape') {
+      setCustomerOpen(false);
+      e.currentTarget.blur();
+    }
+  };
+
+  const handleProductKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setProductOpen(true);
+      setProductFocused((f) => (filteredProducts.length ? (f + 1) % filteredProducts.length : 0));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setProductFocused((f) => (filteredProducts.length ? (f - 1 + filteredProducts.length) % filteredProducts.length : 0));
+    } else if (e.key === 'Enter') {
+      if (filteredProducts[productFocused]) {
+        addToCart(filteredProducts[productFocused]);
+        setProductSearch('');
+        setProductOpen(false);
+      }
+    } else if (e.key === 'Escape') {
+      setProductOpen(false);
+      e.currentTarget.blur();
+    }
+  };
 
   const handlePrint = () => {
     if (!selectedCustomer) {
@@ -126,29 +205,63 @@ export default function POSPage() {
       `}</style>
 
       {/* Header Búsqueda */}
-      <div className="bg-white p-5 md:p-8 rounded-[30px] md:rounded-[40px] border border-slate-100 shadow-sm sticky top-0 z-40 backdrop-blur-xl bg-white/90 no-print">
+      <div className="bg-white p-5 md:p-8 rounded-[30px] md:rounded-[40px] border border-slate-100 shadow-sm no-print">
         {/* Buscar Cliente */}
-        <div className="relative w-full group">
+        <div className="relative w-full" ref={customerBoxRef}>
           <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <input 
-            type="text" 
-            placeholder="Buscar cliente..."
+          <input
+            type="text"
+            placeholder={selectedCustomer ? selectedCustomer.full_name : "Buscar cliente..."}
             className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-sm md:text-base"
-            value={customerSearch}
-            onChange={(e) => setCustomerSearch(e.target.value)}
+            value={selectedCustomer ? '' : customerSearch}
+            onChange={(e) => { setCustomerSearch(e.target.value); setSelectedCustomer(null); setCustomerOpen(true); }}
+            onFocus={() => setCustomerOpen(true)}
+            onKeyDown={handleCustomerKeyDown}
           />
           <AnimatePresence>
-            {customerSearch && (
-              <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className="absolute left-0 right-0 top-full mt-2 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-50 max-h-[300px] overflow-y-auto">
-                {customers.filter(c => 
-                  c.full_name?.toLowerCase().includes(customerSearch.toLowerCase()) || 
-                  c.nit?.toLowerCase().includes(customerSearch.toLowerCase())
-                ).map(c => (
-                  <button key={c.id} onClick={() => { setSelectedCustomer(c); setCustomerSearch(''); }} className="w-full p-4 text-left hover:bg-slate-50 border-b border-slate-50 last:border-none group">
-                    <p className="font-bold text-slate-800 group-hover:text-primary transition-colors uppercase tracking-tight text-sm md:text-base">{c.full_name}</p>
-                    <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mt-1">{c.nit}</p>
-                  </button>
-                ))}
+            {customerOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                transition={{ duration: 0.15 }}
+                className="absolute left-0 right-0 top-full mt-2 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-50 max-h-[300px] overflow-y-auto"
+              >
+                {filteredCustomers.length === 0 ? (
+                  <div className="p-6 text-center">
+                    <p className="font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+                      {customerSearch ? 'Sin resultados' : 'Empieza a escribir para buscar'}
+                    </p>
+                    {customerSearch && (
+                      <p className="text-xs text-slate-400 mt-1">No se encontró un cliente con "{customerSearch}"</p>
+                    )}
+                  </div>
+                ) : (
+                  filteredCustomers.map((c, i) => (
+                    <button
+                      key={c.id}
+                      onClick={() => { setSelectedCustomer(c); setCustomerSearch(''); setCustomerOpen(false); }}
+                      onMouseEnter={() => setCustomerFocused(i)}
+                      className={cn(
+                        "w-full p-4 text-left border-b border-slate-50 last:border-none transition-colors",
+                        i === customerFocused ? "bg-primary/[0.04]" : "hover:bg-slate-50"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black uppercase text-sm shrink-0">
+                          {c.full_name.charAt(0)}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-bold text-slate-800 uppercase tracking-tight text-sm md:text-base truncate">{c.full_name}</p>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{c.nit}</p>
+                        </div>
+                        {c.phone ? (
+                          <span className="ml-auto text-[10px] font-bold text-slate-400 whitespace-nowrap">{c.phone}</span>
+                        ) : null}
+                      </div>
+                    </button>
+                  ))
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -175,35 +288,64 @@ export default function POSPage() {
             )}
 
             {/* Buscar Productos */}
-            <div className="relative w-full group pt-4 no-print">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-              <input 
-                type="text" 
+            <div className="pt-4 no-print">
+              <div className="relative w-full" ref={productBoxRef}>
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
                 placeholder="Buscar productos para añadir..."
                 className="w-full pl-12 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-sm md:text-base"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={productSearch}
+                onChange={(e) => { setProductSearch(e.target.value); setProductOpen(true); }}
+                onFocus={() => setProductOpen(true)}
+                onKeyDown={handleProductKeyDown}
               />
               <AnimatePresence>
-                {searchTerm && (
-                  <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className="absolute left-0 right-0 top-full mt-2 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-50 max-h-[400px] overflow-y-auto">
-                    {products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())).map(p => (
-                      <button key={p.id} onClick={() => { addToCart(p); setSearchTerm(''); }} className="w-full p-3 md:p-4 flex items-center justify-between hover:bg-slate-50 border-b border-slate-50 last:border-none transition-colors">
-                        <div className="flex items-center gap-3 md:gap-4 text-left">
-                          <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                            {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover" /> : <Package className="w-5 h-5 md:w-6 md:h-6 text-slate-200" />}
+                {productOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-0 right-0 top-full mt-2 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden z-50 max-h-[300px] overflow-y-auto"
+                  >
+                    {filteredProducts.length === 0 ? (
+                      <div className="p-6 text-center">
+                        <p className="font-bold text-slate-400 uppercase tracking-widest text-[10px]">
+                          {productSearch ? 'Sin resultados' : 'Empieza a escribir para buscar'}
+                        </p>
+                        {productSearch && (
+                          <p className="text-xs text-slate-400 mt-1">No se encontró un producto con "{productSearch}"</p>
+                        )}
+                      </div>
+                    ) : (
+                      filteredProducts.map((p, i) => (
+                        <button
+                          key={p.id}
+                          onClick={() => { addToCart(p); setProductSearch(''); setProductOpen(false); }}
+                          onMouseEnter={() => setProductFocused(i)}
+                          className={cn(
+                            "w-full p-3 md:p-4 flex items-center justify-between text-left transition-colors border-b border-slate-50 last:border-none",
+                            i === productFocused ? "bg-primary/[0.04]" : "hover:bg-slate-50"
+                          )}
+                        >
+                          <div className="flex items-center gap-3 md:gap-4 text-left min-w-0">
+                            <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                              {p.image_url ? <img src={p.image_url} alt="" className="w-full h-full object-cover" /> : <Package className="w-5 h-5 md:w-6 md:h-6 text-slate-200" />}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="font-bold text-slate-800 uppercase tracking-tight text-sm md:text-base truncate">{p.name}</p>
+                              <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">{p.brand}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-bold text-slate-800 uppercase tracking-tight text-sm md:text-base">{p.name}</p>
-                            <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">{p.brand}</p>
-                          </div>
-                        </div>
-                        <p className="font-black text-primary text-sm md:text-base">{formatCurrency(p.base_price * (1 + p.tax_percentage/100))}</p>
-                      </button>
-                    ))}
+                          <p className="font-black text-primary text-sm md:text-base whitespace-nowrap ml-3">{formatCurrency(p.base_price * (1 + p.tax_percentage/100))}</p>
+                        </button>
+                      ))
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
+              </div>
             </div>
           </div>
 
@@ -244,8 +386,8 @@ export default function POSPage() {
               <tr className="border-b border-slate-50 bg-slate-50/20">
                 <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Descripción</th>
                 <th className="w-24 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Cant.</th>
-                <th className="w-32 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Sin IVA</th>
-                <th className="w-32 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Unitario</th>
+                <th className="w-32 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Subtotal sin IVA</th>
+                <th className="w-32 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">IVA</th>
                 <th className="w-40 px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total</th>
                 <th className="w-16 px-4 py-6 no-print"></th>
               </tr>
@@ -260,14 +402,15 @@ export default function POSPage() {
                   <td className="w-24 px-4 py-4 text-center">
                     <input 
                       type="number" 
+                      min={1}
                       value={item.quantity || ''} 
                       placeholder="0"
                       onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 0)}
                       className="w-16 text-center font-bold text-slate-700 bg-slate-50/50 rounded-lg py-2 border-none outline-none focus:ring-2 focus:ring-primary/10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all tabular-nums"
                     />
                   </td>
-                  <td className="w-32 px-4 py-4 text-right font-bold text-slate-500 whitespace-nowrap tabular-nums">{formatCurrency(item.base_price)}</td>
-                  <td className="w-32 px-4 py-4 text-right font-bold text-slate-600 whitespace-nowrap tabular-nums">{formatCurrency(item.base_price * (1 + item.tax_percentage/100))}</td>
+                  <td className="w-32 px-4 py-4 text-right font-bold text-slate-500 whitespace-nowrap tabular-nums">{formatCurrency(item.base_price * item.quantity)}</td>
+                  <td className="w-32 px-4 py-4 text-right font-bold text-slate-500 whitespace-nowrap tabular-nums">{formatCurrency(item.base_price * (item.tax_percentage / 100) * item.quantity)}</td>
                   <td className="w-40 px-10 py-4 text-right font-black text-slate-900 whitespace-nowrap tabular-nums">{formatCurrency(item.base_price * (1 + item.tax_percentage/100) * item.quantity)}</td>
                   <td className="w-16 px-4 py-4 text-center no-print">
                     <button onClick={() => removeFromCart(item.id)} className="p-2 text-slate-200 hover:text-red-500 transition-colors">
@@ -289,11 +432,11 @@ export default function POSPage() {
           </div>
           <div className="w-full md:w-80 space-y-3">
             <div className="flex justify-between text-sm font-bold text-slate-500 uppercase tracking-widest">
-              <span>Subtotal</span>
+              <span>Subtotal (sin IVA)</span>
               <span>{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between text-sm font-bold text-slate-500 uppercase tracking-widest">
-              <span>IVA (19%)</span>
+              <span>IVA ({effectiveIvaRate}%)</span>
               <span>{formatCurrency(tax)}</span>
             </div>
             <div className="pt-6 border-t border-slate-200 flex justify-between items-end">
