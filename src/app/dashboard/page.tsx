@@ -118,8 +118,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-[calc(100dvh-64px)] bg-gradient-to-br from-[#f8f9ff] via-[#f1f4ff] to-[#eef2ff] p-8 md:p-16 overflow-x-clip">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-[calc(100dvh-64px)] bg-gradient-to-br from-[#f8f9ff] via-[#f1f4ff] to-[#eef2ff] p-8 md:p-16 overflow-x-clip flex items-center justify-center">
+      <div className="max-w-6xl mx-auto w-full">
         {modules.length === 0 ? (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -138,7 +138,7 @@ export default function DashboardPage() {
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-wrap justify-center gap-x-8 gap-y-12"
+            className="flex flex-wrap justify-center items-center gap-x-8 gap-y-12"
           >
             {modules.map((mod, i) => {
               const Icon = moduleIconMap[mod.module_key] || Package;
