@@ -12,6 +12,18 @@ Estos scripts se ejecutan **manualmente** en el SQL Editor de Supabase. No hay h
 | 004 | `004_migracion_roles.sql` | Migración one-off: renombra valores viejos en `profiles.role` (`owner`→`admin`, `seller`→`accounting`) |
 | 005 | `005_fix_profiles_role_constraint.sql` | Elimina CHECK constraint duplicada en `profiles.role`, deja solo `valid_roles` |
 | 006 | `006_add_email_to_profiles.sql` | Agrega columna `email` a `profiles` con backfill desde `auth.users` |
+| 009 | `009_helper_functions.sql` | **[SEGURIDAD]** Helpers `SECURITY DEFINER` (`is_super_admin`, `current_tenant_id`, `current_role`, `can_access_module`) que rompen la recursión infinita de RLS. **APLICAR PRIMERO** que 007 y 008 |
+| 007 | `007_fix_customers_rls.sql` | **[SEGURIDAD]** Aislamiento multi-tenant estricto en `customers` (USING+WITH CHECK, sin cláusula comodín) + reescritura de las demás policies `for all` sin WITH CHECK de 001/003 |
+| 008 | `008_fix_profiles_privesc.sql` | **[SEGURIDAD]** Cierra auto-escalación en `profiles`: solo super admin escribe; usuario normal no puede tocar `role`/`is_super_admin`/`tenant_id` |
+| 010 | `010_audit_log.sql` | **[SEGURIDAD]** Tabla `audit_log` de acciones administrativas (RLS: solo lectura para super admin) |
+
+## ⚠️ Orden de seguridad (puntos críticos de RLS)
+
+Los cambios de RLS son interdependentes: **009 debe aplicarse ANTES que 007 y 008**, porque 007 y 008 usan los helpers que crea 009. Probarlos en staging antes de producción.
+
+```
+009 (helpers)  →  007 (customers + audit for all)  →  008 (profiles privesc)
+```
 
 ## Archivos sin orden definido (nunca aplicados en producción)
 
