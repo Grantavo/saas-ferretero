@@ -2,6 +2,18 @@
 
 ## [dev] 06/08/2026
 
+### Seguridad — remisión de auditoría (10 hallazgos, en marcha)
+- **[CRÍTICO]** `database/007_fix_customers_rls.sql`: reescritas las policies de `customers` y demás tablas sin cláusula comodín (USING+WITH CHECK), aislamiento multi-tenant estricto. Antes la policy tenía una tautología que volvía visible todo.
+- **[CRÍTICO]** `database/008_fix_profiles_privesc.sql`: se cierra la auto-escalación en `profiles` — solo el super admin escribe; el usuario normal no puede alterar `role`/`is_super_admin`/`tenant_id`.
+- **[CRÍTICO]** `database/009_helper_functions.sql`: helpers `SECURITY DEFINER` (`is_super_admin`, `current_tenant_id`, `current_role`, `can_access_module`) que rompen la recursión infinita de RLS.
+- **[ALTO]** Se eliminan las páginas bootstrap `src/app/setup/page.tsx` y `src/app/test-db/page.tsx` (el onboarding real es por `/admin`). `proxy.ts` ya protegía `/setup` y `/test-db`.
+- **[ALTO]** Importación de inventario movida a API route server-side (`src/app/api/dashboard/inventory/import/route.ts`): el tenant se deriva del usuario autenticado (nunca de `select ... limit(1)`), parsing con `exceljs` (se elimina `xlsx`, que arrastra CVEs), límite de 5 MB / 5000 filas, insert con Service Role Key.
+- **[MEDIO]** `src/lib/supabase/requireModule.ts`: chequeo de módulo por rol a nivel de ruta (defense in depth sobre las policies de `role_permissions`). Aplicado en la API de import de inventario (`inventory`).
+- **[MEDIO]** `next.config.ts`: headers de seguridad (X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy, HSTS). CSP descomentada a activar con tests.
+- **[MEDIO]** `src/lib/validation/password.ts` + `src/lib/security/rateLimit.ts`: política de contraseña (≥10) y rate-limit por IP. Aplicados en las 5 rutas de admin: `users/create`, `create-user`, `users/password`, `users/delete`, `delete-tenant`.
+- **[MEDIO]** `database/010_audit_log.sql`: tabla de auditoría con RLS (solo super admin lee); insert desde las 5 rutas de admin (crear/eliminar usuarios, password, delete tenant).
+- **Nota de monitoreo**: `npm audit` aún reporta vulns de `next` (incluye bypass de middleware con Turbopack — relevante al proxy) y deps de `next` (`sharp`, `postcss`); el fix requiere subir a `next 16.3.0` (fuera de rango). Se documenta por ahora; decisión de upgrade separada.
+
 ### Punto de Venta — búsqueda de cliente profesional
 - `src/app/dashboard/pos/page.tsx`
 - El dropdown del cliente ya no depende de escribir texto: se abre al **enfocar** el input y se cierra con **clic fuera**
