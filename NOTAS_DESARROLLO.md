@@ -100,9 +100,43 @@ Nunca debe llegar al cliente/navegador. Todas las operaciones administrativas (c
 ### Delay de 500ms después del login
 El flujo de login espera 500ms antes de redirigir, para dar tiempo a que la sesión se propague y las políticas RLS puedan resolver correctamente el `tenant_id` del usuario. Si algún día se quita ese delay pensando que es innecesario, puede que la primera carga del dashboard falle por RLS.
 
+### Control de módulos: dos capas de control
+Los módulos del dashboard se controlan por DOS tablas independientes:
+- `tenant_modules` (`is_active`) → "¿la app está activa para el negocio?" (pestaña Aplicaciones del admin).
+- `role_permissions` (`can_access` por rol + módulo) → "¿qué rol tiene permiso de ver qué módulo?" (pestaña Permisos del admin).
+
+Decisión de producto (emitida por el usuario 06/08): al activar un módulo, `toggleModule` concede automáticamente `can_access=true` a `role_permissions` **solo para el rol `admin`** (el super admin no configura roles de equipo; lo decide el propio admin del negocio después, manualmente). El resto de filas de rol se siguen editando a mano en la pestaña Permisos.
+
 ---
 
-## 6. Antes de dar un cambio por terminado
+## 6. PENDIENTE — Ventas y notificaciones reales (en curso, 06/08)
+
+La campanita de notificaciones del dashboard es 100% maqueta: badge "2" hardcodeado y alertas de "Stock Bajo"/"Nueva Venta" inventadas en el JSX de `src/app/dashboard/layout.tsx`. **No hay ninguna lógica real detrás.** Antes de construir notificaciones hay que arreglar la raíz del problema de datos:
+
+### Lo que no existe hoy (confirmado por código el 06/08)
+1. **El POS no guarda las ventas**: al "Facturar/Guardar" en `src/app/dashboard/pos/page.tsx` solo se llama `window.print()`. No hay `insert` en `sales` ni `sale_items`.
+2. **El stock no se descuenta al vender**: `products.stock` solo cambia al cargar manualmente (nuevo/import). Por eso el inventario "Stock Bajo" no refleja ventas reales.
+3. **No hay sistema de notificaciones**: ni tabla `notifications`, ni lógica. El "stock bajo" podría salir de leer `products` reales (tiene `stock` y `min_stock`), pero las ventas del día NO (porque no hay ventas guardadas).
+
+### Plan acordado con el usuario (06/08)
+- Crear un RPC server-side `recordSale` (función SQL `security definer`) que en UNA transacción: inserte en `sales` → `sale_items` → descuente `stock` de `products`. En Supabase multi-tenant NO se hacen inserts sueltos desde el cliente (violan atomicidad y RLS).
+- Conectar el POS a ese RPC en Guardar/Facturar.
+- Recién después construir la campanita con datos reales (stock bajo y, cuando haya ventas reales, ventas del día).
+
+### Bloqueante antes de escribir el RPC
+El esquema base de `sales` / `sale_items` / `products` **no está en `database/`** (viene de una base previa; los scripts de `001+` solo agregan policies, no crean esas tablas). **El usuario debe verificar las columnas exactas** en Supabase → SQL Editor con:
+```sql
+select column_name, data_type, is_nullable
+from information_schema.columns
+where table_schema = 'public'
+  and table_name in ('sales', 'sale_items', 'products')
+order by table_name, ordinal_position;
+```
+Sin eso no se puede escribir el RPC sin adivinar columnas. Esto quedó PENDIENTE al cerrar sesión el 06/08.
+
+---
+
+## 7. Antes de dar un cambio por terminado
 
 Checklist rápido:
 ```bash

@@ -1,7 +1,64 @@
 # Changelog — Últimos Cambios
 
-### Docs: se agrega NOTAS_DESARROLLO.md con tips de flujo de trabajo y lecciones aprendidas
-- Nuevo archivo con tips de terminal Windows, gotchas de Next.js 16, flujo git+dev, patrones de Supabase, seguridad y checklist de QA
+## [dev] 06/08/2026
+
+### Punto de Venta — búsqueda de cliente profesional
+- `src/app/dashboard/pos/page.tsx`
+- El dropdown del cliente ya no depende de escribir texto: se abre al **enfocar** el input y se cierra con **clic fuera**
+- **Estado vacío** diferenciado: "Empieza a escribir para buscar" (sin texto) / "Sin resultados" (búsqueda sin match)
+- **Navegación por teclado**: ↑/↓ para moverse, **Enter** selecciona, **Esc** cierra; el ítem activo se resalta y el hover se sincroniza con el teclado
+- Cada cliente muestra **avatar con la inicial**, nombre, NIT y teléfono
+- Al elegir, el placeholder del input muestra el nombre del cliente seleccionado (chip); tocar de nuevo permite cambiarlo sin borrar manualmente
+
+### Punto de Venta — búsqueda de productos profesional
+- Mismo tratamiento que la de cliente: dropdown al enfocar, cierre por clic fuera, estado vacío, navegación por teclado, resaltado del ítem activo
+- La búsqueda ahora filtra por **nombre y marca** (antes solo nombre)
+- Item con imagen/nombre/marca/precio y `min-w-0` para que los nombres largos no desborden
+
+### Punto de Venta — icono de búsqueda centrado
+- La lupa de productos quedaba ~8px arriba del centro porque el `relative` que la centraba también tenía el `pt-4`
+- Solución: el `pt-4` se movió a un wrapper externo; el `relative` que posiciona el icono abraza solo el input → lupa alineada al centro real
+
+### Punto de Venta — barra de búsqueda ya no es sticky
+- Eliminado `sticky top-0 z-40 backdrop-blur-xl` del header de búsqueda; ahora es parte del flujo del documento y scrolle con la página en vez de quedar tapando el contenido
+
+### Punto de Venta — cantidad y precios afinados
+- **IVA dinámico**: el rótulo del pie ya no está hardcodeado al 19%; calcula `effectiveIvaRate = tax/subtotal` para reflejar la tasa real de los productos del carrito
+- **Columnas consistentes**: la fila ahora muestra "Subtotal sin IVA", "IVA" (de la línea) y "Total". El pie usa "Subtotal (sin IVA)", "IVA (x%)" y "Total a pagar", de modo que cada total del pie corresponda a la suma de su columna de la tabla
+- **Cantidad acotada**: input con `min={1}` y `Math.max(1, newQty)` en `updateQuantity` — nunca baja a 0 ni deja líneas fantasma
+
+### Dashboard — fix definitivo de la barra de scroll lateral derecha
+- Causa raíz: la home forceaba `min-h-screen` (pantalla completa) + header de 64px → el `body` siempre quedaba ~65px más alto que la ventana, generando barra vertical aunque no hubiera contenido que scrollear
+- `src/app/dashboard/layout.tsx`: el contenedor raíz pasa de `min-h-screen` a `h-screen overflow-hidden`; el `<main>` (ya `overflow-y-auto`) es ahora el único que hace scroll
+- `src/app/dashboard/page.tsx`: la home usa `min-h-[calc(100dvh-64px)]` para llenar el área visible bajo el header (64px) en vez de forzar pantalla completa
+- Resultado: la home con contenido corto ya no muestra barra; el scroll vertical solo aparece cuando el contenido real la supera. El scroll horizontal (de abajo) ya había quedado resuelto con `overflow-x: clip` en `html/body` (27/07)
+
+## [dev] 28/07/2026
+
+### Cambio 1/3: activar módulo ahora concede permiso automático al rol admin
+- Al activar una app en la pestaña "Aplicaciones", `grantAdminPermission` da acceso `can_access=true` al rol `admin` en `role_permissions`
+- El resto de roles se configuran manualmente por el admin en la pestaña "Permisos"
+
+### Cambio 2/3: el dashboard muestra exactamente los módulos activados para el rol
+- `src/app/dashboard/page.tsx`: eliminado el fallback hardcodeado de 10 módulos (mostraba apps que el negocio no tenía activas)
+- Eliminado el bypass que mostraba todos los activos cuando el rol no tenía permisos (violaba "ni uno más ni uno menos")
+- Ahora siempre se aplica la intersección estricta: `tenant_modules(is_active=true)` ∩ `role_permissions(can_access=true del rol)`
+- Rol sin permisos registrados → no ve nada
+- Añadido estado vacío con mensaje ("No tienes módulos habilitados") en vez de página en blanco
+
+### Cambio 3/3: íconos del dashboard siempre centrados
+- `src/app/dashboard/page.tsx`: el contenedor de módulos pasa de `grid grid-cols-*` a `flex flex-wrap justify-center`
+- Con la grilla, las filas parciales (1-5 módulos) quedaban alineadas a la izquierda; con flex + justify-center el grupo completo queda centrado sin importar la cantidad
+- Sin cambios en los estilos de cada tile (tamaño, color, icono, hover)
+
+### Fix: sin barra de scroll lateral en el dashboard
+- `src/app/dashboard/layout.tsx`: `<main>` pasa de `overflow-auto` a `overflow-y-auto overflow-x-clip`
+- `src/app/dashboard/layout.tsx`: contenedor raíz `overflow-x-clip` + `min-w-0` en el hijo flex
+- `src/app/dashboard/page.tsx`: contenedor de la home con `overflow-x-clip`
+- `src/app/globals.css`: `overflow-x: clip` en `html` y `body` (nivel raíz) — corta el desborde horizontal que venía del documento, sin romper `position: sticky` (por eso `clip` y no `hidden`)
+- Elimina la barra lateral en la pantalla del negocio; el scroll vertical sigue normal
+
+## 28/07/2026
 
 ### Fix: public/sw.js ahora se trackea en git
 - Eliminado `public/sw.js` de `.gitignore`
