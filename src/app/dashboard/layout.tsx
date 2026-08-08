@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Bell, 
   Grid, 
-  Clock,
   User,
   LogOut,
   Settings,
@@ -34,7 +33,6 @@ export default function DashboardLayout({
   }, []);
 
   const [showNotifications, setShowNotifications] = useState(false);
-  const [showActivity, setShowActivity] = useState(false);
 
   const [lowStockItems, setLowStockItems] = useState<{ id: string; name: string; stock: number; min_stock: number }[]>([]);
   const [readLowStock, setReadLowStock] = useState<string[]>([]);
@@ -95,13 +93,12 @@ export default function DashboardLayout({
     const handleClickOutside = () => {
       setShowUserMenu(false);
       setShowNotifications(false);
-      setShowActivity(false);
     };
-    if (showUserMenu || showNotifications || showActivity) {
+    if (showUserMenu || showNotifications) {
       document.addEventListener('click', handleClickOutside);
       return () => document.removeEventListener('click', handleClickOutside);
     }
-  }, [showUserMenu, showNotifications, showActivity]);
+  }, [showUserMenu, showNotifications]);
 
   const normalizedPath = pathname.replace(/\/$/, '') || '/dashboard';
   const isHome = normalizedPath === '/dashboard';
@@ -187,11 +184,10 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1 mr-4">
               {/* Notificaciones */}
               <div className="relative">
                 <button 
-                  onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); setShowActivity(false); setShowUserMenu(false); }}
+                  onClick={(e) => { e.stopPropagation(); setShowNotifications(!showNotifications); setShowUserMenu(false); }}
                   className={cn(
                     "p-2 rounded-lg transition-all relative",
                     showNotifications ? "bg-primary/10 text-primary" : "hover:bg-slate-100 text-slate-600"
@@ -246,55 +242,10 @@ export default function DashboardLayout({
                 </AnimatePresence>
               </div>
 
-              {/* Reloj / Actividad */}
-              <div className="relative">
-                <button 
-                  onClick={(e) => { e.stopPropagation(); setShowActivity(!showActivity); setShowNotifications(false); setShowUserMenu(false); }}
-                  className={cn(
-                    "p-2 rounded-lg transition-all",
-                    showActivity ? "bg-primary/10 text-primary" : "hover:bg-slate-100 text-slate-600"
-                  )}
-                >
-                  <Clock className="w-5 h-5" />
-                </button>
-
-                <AnimatePresence>
-                  {showActivity && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                      className="absolute right-0 sm:right-auto top-12 w-64 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50"
-                    >
-                      <div className="p-4 border-b border-slate-50">
-                        <p className="font-black text-slate-800 text-sm">Actividad Reciente</p>
-                      </div>
-                      <div className="p-2">
-                        <div className="flex items-start gap-3 p-3">
-                          <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-                          <div>
-                            <p className="text-xs font-bold text-slate-700 leading-tight">Producto "Tornillo 2x4" creado exitosamente</p>
-                            <p className="text-[10px] text-slate-400 mt-1 font-medium">Hace 5 minutos</p>
-                          </div>
-                        </div>
-                        <div className="flex items-start gap-3 p-3">
-                          <div className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
-                          <div>
-                            <p className="text-xs font-bold text-slate-700 leading-tight">Inicio de sesión detectado</p>
-                            <p className="text-[10px] text-slate-400 mt-1 font-medium">Hace 1 hora</p>
-                          </div>
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-            
-            {/* User Profile Menu */}
+              {/* User Profile Menu */}
             <div className="relative">
               <button 
-                onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); setShowNotifications(false); setShowActivity(false); }}
+                onClick={(e) => { e.stopPropagation(); setShowUserMenu(!showUserMenu); setShowNotifications(false); }}
                 className="flex items-center gap-3 pl-4 border-l border-slate-200 hover:opacity-80 transition-opacity"
               >
                 <span className="text-sm font-bold text-slate-700 hidden sm:block uppercase tracking-tight">{tenant?.name || 'Ferretería'}</span>
