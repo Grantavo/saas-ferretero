@@ -60,6 +60,7 @@ export default function POSPage() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [docType, setDocType] = useState<'sale' | 'quote'>('quote');
+  const [paymentTerm, setPaymentTerm] = useState<'cash' | 'credit'>('cash');
   const [notes, setNotes] = useState('');
 
   const supabase = createClient();
@@ -191,13 +192,19 @@ export default function POSPage() {
   const handleCheckout = async () => {
     if (processing || cart.length === 0) return;
 
+    if (paymentTerm === 'credit' && !selectedCustomer) {
+      toast.error('Selecciona un cliente para vender a crédito');
+      return;
+    }
+
     setProcessing(true);
     try {
       const items = cart.map(item => ({ product_id: item.id, quantity: item.quantity }));
 
-      const { data: saleId, error } = await supabase.rpc('record_sale', {
+      const { data: saleId, error } = await supabase.rpc('record_sale_with_customer', {
         p_items: items,
-        p_payment_method: 'cash',
+        p_payment_method: paymentTerm,
+        p_customer_id: selectedCustomer?.id ?? null,
       });
 
       if (error) {
@@ -209,7 +216,6 @@ export default function POSPage() {
         await supabase
           .from('sales')
           .update({
-            customer_id: selectedCustomer?.id ?? null,
             customer_name: selectedCustomer?.full_name ?? null,
             customer_nit: selectedCustomer?.nit ?? null,
             customer_address: selectedCustomer?.address ?? null,
@@ -412,7 +418,32 @@ export default function POSPage() {
               </div>
               <div className="flex justify-between items-center gap-8">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{docType === 'quote' ? 'Vigencia' : 'Términos de pago'}</label>
-                <p className="font-bold text-slate-700 text-sm">{docType === 'quote' ? '8 Días' : 'Inmediato'}</p>
+                {docType === 'quote' ? (
+                  <p className="font-bold text-slate-700 text-sm">8 Días</p>
+                ) : (
+                  <div className="flex bg-slate-100 rounded-lg p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentTerm('cash')}
+                      className={cn(
+                        "px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all",
+                        paymentTerm === 'cash' ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400"
+                      )}
+                    >
+                      Contado
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentTerm('credit')}
+                      className={cn(
+                        "px-3 py-1.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all",
+                        paymentTerm === 'credit' ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400"
+                      )}
+                    >
+                      Crédito
+                    </button>
+                  </div>
+                )}
               </div>
               <div className="pt-2 border-t border-slate-50 flex justify-between items-center gap-8">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha Emisión</label>
