@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { 
   FileText, 
   Search, 
@@ -146,9 +147,12 @@ export default function SalesPage() {
                     </td>
                     <td className="px-8 py-5">
                       <div className="flex justify-center gap-2">
-                        <button className="p-2 hover:bg-white rounded-xl border border-transparent hover:border-slate-100 text-slate-400 hover:text-primary transition-all">
+                        <Link
+                          href={`/dashboard/sales/${sale.id}`}
+                          className="p-2 hover:bg-white rounded-xl border border-transparent hover:border-slate-100 text-slate-400 hover:text-primary transition-all"
+                        >
                           <Eye className="w-5 h-5" />
-                        </button>
+                        </Link>
                       </div>
                     </td>
                   </motion.tr>
