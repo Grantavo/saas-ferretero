@@ -36,6 +36,60 @@ export default function DashboardLayout({
   const [showNotifications, setShowNotifications] = useState(false);
   const [showActivity, setShowActivity] = useState(false);
 
+  const [lowStockItems, setLowStockItems] = useState<{ id: string; name: string; stock: number; min_stock: number }[]>([]);
+  const [readLowStock, setReadLowStock] = useState<string[]>([]);
+  const [readSales, setReadSales] = useState<string[]>([]);
+  const [todaySales, setTodaySales] = useState<{ id: string; total_amount: number; created_at: string }[]>([]);
+
+  const supabase = createClient();
+
+  useEffect(() => {
+    async function fetchNotifications() {
+      if (!profile?.tenant_id) return;
+
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+
+      const [productsRes, salesRes] = await Promise.all([
+        supabase
+          .from('products')
+          .select('id, name, stock, min_stock')
+          .eq('tenant_id', profile.tenant_id),
+        supabase
+          .from('sales')
+          .select('id, total_amount, created_at')
+          .eq('tenant_id', profile.tenant_id)
+          .gte('created_at', startOfToday.toISOString())
+          .order('created_at', { ascending: false })
+          .limit(5),
+      ]);
+
+      if (!productsRes.error) {
+        const lowStock = (productsRes.data ?? []).filter(p => p.stock <= p.min_stock);
+        setLowStockItems(lowStock);
+      }
+
+      if (!salesRes.error && salesRes.data) {
+        setTodaySales(salesRes.data);
+      }
+    }
+
+    fetchNotifications();
+  }, [profile?.tenant_id, pathname]);
+
+  useEffect(() => {
+    if (!profile?.tenant_id) return;
+    try {
+      const stored = localStorage.getItem(`lowStockRead:${profile.tenant_id}`);
+      if (stored) setReadLowStock(JSON.parse(stored));
+      const storedSales = localStorage.getItem(`saleRead:${profile.tenant_id}`);
+      if (storedSales) setReadSales(JSON.parse(storedSales));
+    } catch {
+      setReadLowStock([]);
+      setReadSales([]);
+    }
+  }, [profile?.tenant_id]);
+
   // Cerrar menús al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = () => {
@@ -86,7 +140,28 @@ export default function DashboardLayout({
     router.push('/login');
   };
 
+  const formatCurrencyCOP = (val: number) =>
+    new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(val);
+
+  const markLowStockRead = (id: string) => {
+    if (!profile?.tenant_id) return;
+    const next = readLowStock.includes(id) ? readLowStock : [...readLowStock, id];
+    setReadLowStock(next);
+    localStorage.setItem(`lowStockRead:${profile.tenant_id}`, JSON.stringify(next));
+  };
+
+  const markSaleRead = (id: string) => {
+    if (!profile?.tenant_id) return;
+    const next = readSales.includes(id) ? readSales : [...readSales, id];
+    setReadSales(next);
+    localStorage.setItem(`saleRead:${profile.tenant_id}`, JSON.stringify(next));
+  };
+
   if (!mounted || loading) return <div className="min-h-screen bg-[#f8f9ff]" />;
+
+  const unreadLowStock = lowStockItems.filter(item => !readLowStock.includes(item.id));
+  const unreadSales = todaySales.filter(sale => !readSales.includes(sale.id));
+  const notificationCount = unreadLowStock.length + unreadSales.length;
 
   return (
     <div className="flex h-screen bg-[#f8f9ff] overflow-hidden">
@@ -123,9 +198,11 @@ export default function DashboardLayout({
                   )}
                 >
                   <Bell className="w-5 h-5" />
-                  <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-[10px] font-bold text-white flex items-center justify-center rounded-full border-2 border-white">
-                    2
-                  </span>
+                  {notificationCount > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 text-[10px] font-bold text-white flex items-center justify-center rounded-full border-2 border-white">
+                      {notificationCount}
+                    </span>
+                  )}
                 </button>
 
                 <AnimatePresence>
@@ -134,21 +211,35 @@ export default function DashboardLayout({
                       initial={{ opacity: 0, y: 8, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 8, scale: 0.95 }}
-                      className="absolute right-0 sm:right-auto top-12 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50"
+                      className="absolute right-0 top-12 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50"
                     >
                       <div className="p-4 border-b border-slate-50 flex items-center justify-between">
                         <p className="font-black text-slate-800 text-sm">Notificaciones</p>
                         <span className="text-[10px] bg-red-50 text-red-600 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest">Stock Bajo</span>
                       </div>
                       <div className="p-2 max-h-[300px] overflow-auto">
-                        <div className="p-3 hover:bg-slate-50 rounded-xl transition-all cursor-pointer">
-                          <p className="text-xs font-bold text-slate-800">¡Alerta de Inventario!</p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">El producto "MARTILLO 16OZ" está por debajo del stock mínimo (2 unidades).</p>
-                        </div>
-                        <div className="p-3 hover:bg-slate-50 rounded-xl transition-all cursor-pointer">
-                          <p className="text-xs font-bold text-slate-800">Nueva Venta</p>
-                          <p className="text-[11px] text-slate-500 mt-0.5">Se ha registrado una venta por $150.000 COP.</p>
-                        </div>
+                        {unreadLowStock.length === 0 && unreadSales.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center text-center py-10 gap-2">
+                            <p className="text-sm font-semibold text-slate-500">
+                              No tienes notificaciones nuevas
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            {unreadLowStock.map(item => (
+                              <div key={item.id} onClick={() => markLowStockRead(item.id)} className="p-3 hover:bg-slate-50 rounded-xl transition-all cursor-pointer">
+                                <p className="text-xs font-bold text-slate-800">Stock bajo: {item.name}</p>
+                                <p className="text-[11px] text-slate-500 mt-0.5">Quedan {item.stock} unidades · mínimo {item.min_stock}.</p>
+                              </div>
+                            ))}
+                            {unreadSales.map(sale => (
+                              <div key={sale.id} onClick={() => { markSaleRead(sale.id); router.push(`/dashboard/sales/${sale.id}`); }} className="p-3 hover:bg-slate-50 rounded-xl transition-all cursor-pointer">
+                                <p className="text-xs font-bold text-slate-800">Nueva Venta</p>
+                                <p className="text-[11px] text-slate-500 mt-0.5">Se ha registrado una venta por {formatCurrencyCOP(sale.total_amount)} · {new Date(sale.created_at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}.</p>
+                              </div>
+                            ))}
+                          </>
+                        )}
                       </div>
                     </motion.div>
                   )}
