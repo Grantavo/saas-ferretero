@@ -60,6 +60,7 @@ export default function POSPage() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [docType, setDocType] = useState<'sale' | 'quote'>('quote');
+  const [notes, setNotes] = useState('');
 
   const supabase = createClient();
 
@@ -202,6 +203,20 @@ export default function POSPage() {
       if (error) {
         toast.error(error.message);
         return;
+      }
+
+      if (saleId) {
+        await supabase
+          .from('sales')
+          .update({
+            customer_id: selectedCustomer?.id ?? null,
+            customer_name: selectedCustomer?.full_name ?? null,
+            customer_nit: selectedCustomer?.nit ?? null,
+            customer_address: selectedCustomer?.address ?? null,
+            customer_phone: selectedCustomer?.phone ?? null,
+            notes: notes || null,
+          })
+          .eq('id', saleId);
       }
 
       handlePrint();
@@ -361,6 +376,9 @@ export default function POSPage() {
                             <div className="min-w-0">
                               <p className="font-bold text-slate-800 uppercase tracking-tight text-sm md:text-base truncate">{p.name}</p>
                               <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">{p.brand}</p>
+                              <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest mt-0.5">
+                                Stock: <span className={cn(p.stock <= 0 ? "text-red-500" : "text-slate-500")}>{p.stock}</span>
+                              </p>
                             </div>
                           </div>
                           <p className="font-black text-primary text-sm md:text-base whitespace-nowrap ml-3">{formatCurrency(p.base_price * (1 + p.tax_percentage/100))}</p>
@@ -425,12 +443,22 @@ export default function POSPage() {
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{item.brand}</p>
                   </td>
                   <td className="w-24 px-4 py-4 text-center">
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       min={1}
-                      value={item.quantity || ''} 
+                      value={item.quantity === 0 ? '' : item.quantity}
                       placeholder="0"
-                      onChange={(e) => updateQuantity(item.id, parseInt(e.target.value) || 0)}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        setCart(prev => prev.map(ci =>
+                          ci.id === item.id ? { ...ci, quantity: raw === '' ? 0 : parseInt(raw) || 0 } : ci
+                        ));
+                      }}
+                      onWheel={(e) => e.currentTarget.blur()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
+                      }}
+                      onBlur={() => updateQuantity(item.id, item.quantity)}
                       className="w-16 text-center font-bold text-slate-700 bg-slate-50/50 rounded-lg py-2 border-none outline-none focus:ring-2 focus:ring-primary/10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all tabular-nums"
                     />
                   </td>
@@ -454,6 +482,19 @@ export default function POSPage() {
             <p className="text-[10px] text-slate-400 leading-relaxed font-medium uppercase tracking-wider">
               {docType === 'quote' ? 'Vigencia de 8 días. Precios incluyen IVA.' : 'Factura de venta legal.'}
             </p>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Notas para la factura (despacho, cobro al recibir, etc.)"
+              rows={3}
+              className="no-print mt-3 w-full bg-slate-50/50 border border-slate-100 rounded-xl p-3 text-xs font-medium text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-primary/10 outline-none transition-all resize-none"
+            />
+            {notes && (
+              <div className="mt-3 pt-3 border-t border-slate-100">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Notas</p>
+                <p className="text-xs font-medium text-slate-600 whitespace-pre-wrap">{notes}</p>
+              </div>
+            )}
           </div>
           <div className="w-full md:w-80 space-y-3">
             <div className="flex justify-between text-sm font-bold text-slate-500 uppercase tracking-widest">
