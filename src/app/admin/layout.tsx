@@ -37,6 +37,38 @@ export default function AdminLayout({
   const router = useRouter();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Guard de acceso client-side (defense in depth; el proxy ya bloquea el
+  // render del lado servidor, pero nunca confiamos en una sola capa).
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkSuperAdmin() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (cancelled) return;
+
+      if (!user) {
+        router.replace('/login');
+        return;
+      }
+
+      const { data: isSuperAdmin, error } = await supabase.rpc('is_super_admin');
+      if (cancelled) return;
+
+      if (error || !isSuperAdmin) {
+        router.replace('/dashboard');
+        return;
+      }
+
+      setAuthChecked(true);
+    }
+
+    checkSuperAdmin();
+    return () => { cancelled = true; };
+  }, [router]);
 
   useEffect(() => {
     setMobileSidebarOpen(false);
@@ -121,6 +153,14 @@ export default function AdminLayout({
 
   return (
     <div className="flex min-h-screen bg-[#f8f9ff]">
+      {!authChecked && (
+        <div className="fixed inset-0 z-[100] bg-[#f8f9ff] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <Shield className="w-10 h-10 text-violet-500 animate-pulse" />
+            <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Verificando acceso...</p>
+          </div>
+        </div>
+      )}
       {/* Desktop Sidebar */}
       <aside className={`hidden lg:flex ${sidebarCollapsed ? 'w-20' : 'w-72'} bg-white border-r border-slate-100 flex-col shadow-sm z-10 transition-all duration-300`}>
         {sidebarContent(sidebarCollapsed, true)}

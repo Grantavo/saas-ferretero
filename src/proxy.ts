@@ -48,15 +48,19 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Verificar acceso a rutas de admin
+  // Verificar acceso a rutas de admin (defense in depth, fail-closed)
   if (pathname.startsWith('/admin')) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_super_admin')
-      .eq('id', user.id)
-      .single()
+    try {
+      const { data: isSuperAdmin, error } = await supabase.rpc('is_super_admin')
 
-    if (!profile?.is_super_admin) {
+      // Cualquier error o un perfil no-super-admin = denegado.
+      if (error || !isSuperAdmin) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/dashboard'
+        return NextResponse.redirect(url)
+      }
+    } catch {
+      // Fallo inesperado en la verificación: denegar acceso.
       const url = request.nextUrl.clone()
       url.pathname = '/dashboard'
       return NextResponse.redirect(url)
