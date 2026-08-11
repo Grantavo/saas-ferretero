@@ -345,12 +345,11 @@ Cualquier ruta → ¿Ruta pública? (/, /login, /auth/*, /api/ping) → Permitir
 | Columna | Tipo | Descripción |
 |---------|------|-------------|
 | `id` | UUID PK | Identificador único |
-| `name` | TEXT NOT NULL | Nombre del negocio |
+| `name` | TEXT NOT NULL | Nombre comercial del negocio |
 | `nit` | TEXT | NIT |
 | `address` | TEXT | Dirección |
 | `phone` | TEXT | Teléfono |
-| `business_name` | TEXT | Razón social |
-| `email` | TEXT | Correo de contacto |
+| `updated_at` | TIMESTAMPTZ | Fecha de última modificación |
 | `is_active` | BOOLEAN (true) | Estado de actividad |
 | `created_at` | TIMESTAMPTZ | Fecha de registro |
 
