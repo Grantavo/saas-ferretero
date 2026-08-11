@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import CitySelect from '@/components/CitySelect';
 
 export default function CustomersPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -441,42 +442,25 @@ export default function CustomersPage() {
                   <div className="space-y-1">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Teléfono / Celular</label>
                     <input 
-                      type="text" maxLength={10}
+                      type="text" inputMode="tel" maxLength={10}
                       placeholder="3xx xxx xxxx"
                       className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold outline-none focus:ring-4 focus:ring-primary/5 transition-all" 
-                      value={newCustomer.phone ? (newCustomer.phone.length > 3 ? `${newCustomer.phone.slice(0,3)} ${newCustomer.phone.slice(3,6)} ${newCustomer.phone.slice(6)}` : newCustomer.phone) : ''}
+                      value={newCustomer.phone}
                       onChange={e => {
-                        let val = e.target.value.replace(/[^0-9]/g, "");
-                        if (val.startsWith('3')) {
-                          val = val.slice(0, 10);
-                        } else if (val.length === 0) {
-                          val = '';
-                        } else {
-                          val = ('3' + val).slice(0, 10);
-                        }
-                        setNewCustomer({...newCustomer, phone: val});
+                        const val = e.target.value.replace(/[^0-9]/g, "");
+                        setNewCustomer({...newCustomer, phone: val.slice(0, 10)});
                       }} 
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Ciudad</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email</label>
                     <input 
-                      type="text" 
-                      placeholder="P.ej. Pereira, Dosquebradas..."
+                      type="email" 
                       className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold outline-none focus:ring-4 focus:ring-primary/5 transition-all" 
-                      value={newCustomer.city} 
-                      onChange={e => setNewCustomer({...newCustomer, city: e.target.value})} 
+                      value={newCustomer.email} 
+                      onChange={e => setNewCustomer({...newCustomer, email: e.target.value.toLowerCase()})} 
                     />
                   </div>
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email</label>
-                  <input 
-                    type="email" 
-                    className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold outline-none focus:ring-4 focus:ring-primary/5 transition-all" 
-                    value={newCustomer.email} 
-                    onChange={e => setNewCustomer({...newCustomer, email: e.target.value.toLowerCase()})} 
-                  />
                 </div>
                 <div className="space-y-1">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Dirección</label>
@@ -485,6 +469,13 @@ export default function CustomersPage() {
                     className="w-full p-4 bg-slate-50 border-none rounded-2xl font-bold outline-none focus:ring-4 focus:ring-primary/5 transition-all" 
                     value={newCustomer.address} 
                     onChange={e => setNewCustomer({...newCustomer, address: e.target.value})} 
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Ciudad</label>
+                  <CitySelect
+                    value={newCustomer.city}
+                    onChange={city => setNewCustomer({...newCustomer, city})}
                   />
                 </div>
                 <button type="submit" disabled={saving} className="w-full bg-[#e2e8f0] text-black border border-[#cbd5e1] py-5 rounded-2xl font-normal text-lg hover:bg-white transition-all shadow-sm disabled:opacity-50 sticky bottom-0">
