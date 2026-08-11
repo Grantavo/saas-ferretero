@@ -7,7 +7,7 @@ import {
   Grid, 
   User,
   LogOut,
-  Settings,
+  
   ChevronDown
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -154,6 +154,13 @@ export default function DashboardLayout({
     localStorage.setItem(`saleRead:${profile.tenant_id}`, JSON.stringify(next));
   };
 
+  useEffect(() => {
+    if (!mounted) return;
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [mounted, loading, user, router]);
+
   if (!mounted || loading) return <div className="min-h-screen bg-[#f8f9ff]" />;
 
   const unreadLowStock = lowStockItems.filter(item => !readLowStock.includes(item.id));
@@ -270,13 +277,6 @@ export default function DashboardLayout({
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">{profile?.role === 'admin' ? 'Administrador' : profile?.role === 'accounting' ? 'Contabilidad' : profile?.role === 'seller' ? 'Ventas' : profile?.role === 'warehouse' ? 'Bodega' : profile?.role === 'marketing' ? 'Mercadeo' : 'Usuario'}</p>
                     </div>
                     <div className="p-2">
-                      <Link 
-                        href="/dashboard/settings"
-                        className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all"
-                      >
-                        <Settings className="w-4 h-4 text-slate-400" />
-                        Ajustes
-                      </Link>
                       <button 
                         onClick={handleLogout}
                         className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition-all"
