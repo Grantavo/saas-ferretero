@@ -229,7 +229,11 @@ export default function NewTenantPage() {
                 placeholder="Nombre del administrador"
                 className="w-full pl-12 pr-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-800 outline-none focus:bg-white focus:ring-2 focus:ring-violet-500/20 transition-all font-medium"
                 value={userData.full_name}
-                onChange={(e) => setUserData({...userData, full_name: e.target.value})}
+                onChange={(e) => {
+                  const val = e.target.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z\s]/g, "");
+                  const formatted = val.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+                  setUserData({...userData, full_name: formatted});
+                }}
               />
             </div>
           </div>

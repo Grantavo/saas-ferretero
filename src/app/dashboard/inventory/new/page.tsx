@@ -28,8 +28,8 @@ export default function NewProductPage() {
     name: '',
     brand: '',
     category: '',
-    cost_price: 0,
-    stock: 0,
+    cost_price: '',
+    stock: '',
     margin_percentage: 30,
     tax_percentage: 19,
     base_price: 0
@@ -78,7 +78,9 @@ export default function NewProductPage() {
       const { error } = await supabase
         .from('products')
         .insert([{ 
-          ...formData, 
+          ...formData,
+          cost_price: Number(formData.cost_price) || 0,
+          stock: Number(formData.stock) || 0,
           image_url,
           created_at: new Date().toISOString()
         }]);
@@ -193,9 +195,10 @@ export default function NewProductPage() {
                   <input 
                     required
                     type="number" 
+                    placeholder="0"
                     className="w-full pl-10 pr-4 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-slate-700"
                     value={formData.cost_price}
-                    onChange={(e) => setFormData(prev => ({ ...prev, cost_price: parseFloat(e.target.value) || 0 }))}
+                    onChange={(e) => setFormData(prev => ({ ...prev, cost_price: e.target.value }))}
                   />
                 </div>
               </div>
@@ -203,10 +206,11 @@ export default function NewProductPage() {
                 <label className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1">Stock Inicial</label>
                 <input 
                   required
-                  type="number" 
+                  type="number"
+                  placeholder="0"
                   className="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-4 focus:ring-primary/5 outline-none transition-all font-bold text-orange-600"
                   value={formData.stock}
-                  onChange={(e) => setFormData(prev => ({ ...prev, stock: parseInt(e.target.value) || 0 }))}
+                  onChange={(e) => setFormData(prev => ({ ...prev, stock: e.target.value }))}
                 />
               </div>
             </div>

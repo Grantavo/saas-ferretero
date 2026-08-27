@@ -30,6 +30,7 @@ import {
   Shield,
   Pencil,
   Info,
+  Image,
   CheckCircle2,
   Eye,
   EyeOff
@@ -77,6 +78,8 @@ export default function TenantDetailPage() {
   const [editingTenant, setEditingTenant] = useState(false);
   const [tenantForm, setTenantForm] = useState({ name: '', nit: '', address: '', phone: '' });
   const [savingTenant, setSavingTenant] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
 
   // States for Adding User
   const [showAddUser, setShowAddUser] = useState(false);
@@ -240,10 +243,30 @@ export default function TenantDetailPage() {
     }
     setSavingTenant(true);
     try {
-      const { error } = await supabase.from('tenants').update(tenantForm).eq('id', tenantId);
+      let logo_url = tenant?.logo_url || null;
+
+      if (logoFile) {
+        const fileExt = logoFile.name.split('.').pop();
+        const fileName = `${tenantId}-${Date.now()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage
+          .from('tenant-logos')
+          .upload(fileName, logoFile, { upsert: true, cacheControl: '3600' });
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('tenant-logos')
+          .getPublicUrl(fileName);
+
+        logo_url = publicUrl;
+      }
+
+      const { error } = await supabase.from('tenants').update({ ...tenantForm, logo_url }).eq('id', tenantId);
       if (error) throw error;
-      setTenant({ ...tenant, ...tenantForm });
+      setTenant({ ...tenant, ...tenantForm, logo_url });
       setEditingTenant(false);
+      setLogoFile(null);
+      setLogoPreview(null);
       toast.success('Datos del negocio guardados');
     } catch (e: any) {
       toast.error('Error al guardar: ' + e.message);
@@ -334,9 +357,13 @@ export default function TenantDetailPage() {
       <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 bg-violet-50 rounded-[30%] flex items-center justify-center text-violet-600 font-black text-2xl border border-violet-100 shrink-0">
-              {tenant?.name?.charAt(0) || 'F'}
-            </div>
+            {tenant?.logo_url ? (
+              <img src={tenant.logo_url} alt={tenant.name} className="w-16 h-16 rounded-[30%] object-cover border border-slate-100 shrink-0" />
+            ) : (
+              <div className="w-16 h-16 bg-violet-50 rounded-[30%] flex items-center justify-center text-violet-600 font-black text-2xl border border-violet-100 shrink-0">
+                {tenant?.name?.charAt(0) || 'F'}
+              </div>
+            )}
             <div>
               <h1 className="text-2xl font-black text-slate-800 tracking-tight">{tenant?.name}</h1>
               <div className="flex items-center gap-3 mt-1.5 flex-wrap">
@@ -410,6 +437,46 @@ export default function TenantDetailPage() {
 
               {editingTenant ? (
                 <div className="space-y-6 max-w-2xl">
+                  <div className="flex items-center gap-5">
+                    {logoPreview || tenant?.logo_url ? (
+                      <img 
+                        src={logoPreview || tenant?.logo_url} 
+                        alt="Logo" 
+                        className="w-20 h-20 rounded-[30%] object-cover border border-slate-100 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 bg-violet-50 rounded-[30%] flex items-center justify-center text-violet-600 font-black text-3xl border border-violet-100 shrink-0">
+                        {tenant?.name?.charAt(0) || 'F'}
+                      </div>
+                    )}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">Logo del Negocio</label>
+                      <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-violet-50 text-violet-600 text-xs font-black uppercase tracking-widest rounded-xl cursor-pointer hover:bg-violet-100 transition-all">
+                        <Image className="w-4 h-4" /> Cambiar Logo
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setLogoFile(file);
+                              setLogoPreview(URL.createObjectURL(file));
+                            }
+                          }}
+                        />
+                      </label>
+                      {logoPreview && (
+                        <button
+                          type="button"
+                          onClick={() => { setLogoFile(null); setLogoPreview(null); }}
+                          className="text-[10px] font-bold text-red-400 hover:text-red-600 ml-1"
+                        >
+                          Quitar logo
+                        </button>
+                      )}
+                    </div>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nombre Comercial</label>

@@ -152,7 +152,7 @@ export default function AdminLayout({
   );
 
   return (
-    <div className="flex min-h-screen bg-[#f8f9ff]">
+    <div className="flex h-screen overflow-hidden bg-[#f8f9ff]">
       {!authChecked && (
         <div className="fixed inset-0 z-[100] bg-[#f8f9ff] flex items-center justify-center">
           <div className="flex flex-col items-center gap-4">

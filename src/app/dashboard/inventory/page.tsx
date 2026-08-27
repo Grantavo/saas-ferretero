@@ -19,6 +19,18 @@ export default function InventoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchRole() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+      if (data) setUserRole(data.role);
+    }
+    fetchRole();
+  }, []);
 
   useEffect(() => {
     async function fetchProducts() {
@@ -65,9 +77,15 @@ export default function InventoryPage() {
         </div>
         <Link 
           href="/dashboard/inventory/new"
-          className="bg-primary text-primary-foreground px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+          className="bg-[#e2e8f0] text-black border border-[#cbd5e1] px-6 py-4 rounded-2xl font-normal text-sm hover:bg-white transition-all flex items-center gap-2 shadow-sm group"
         >
-          <Plus className="w-5 h-5" /> Nuevo Producto
+          <motion.div
+            whileHover={{ y: -2, scale: 1.1 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <Plus className="w-5 h-5 text-slate-500 group-hover:text-primary transition-colors" />
+          </motion.div>
+          Nuevo Producto
         </Link>
       </div>
 
@@ -151,6 +169,7 @@ export default function InventoryPage() {
                   </div>
 
                   {/* Accion Editar (Fijo arriba a la derecha) */}
+                  {userRole === 'admin' && (
                   <div className="absolute top-4 right-4">
                     <Link 
                       href={`/dashboard/inventory/edit/${product.id}`}
@@ -159,6 +178,7 @@ export default function InventoryPage() {
                       <Edit2 className="w-4 h-4" />
                     </Link>
                   </div>
+                  )}
                 </motion.div>
               );
             })}

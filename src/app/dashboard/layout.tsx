@@ -32,6 +32,21 @@ export default function DashboardLayout({
     setMounted(true);
   }, []);
 
+  // Heartbeat: marca al usuario como en línea (presencia para el panel admin).
+  useEffect(() => {
+    if (!profile?.id) return;
+    const beat = () => {
+      supabase
+        .rpc('touch_last_seen')
+        .then(({ error }) => {
+          if (error) console.error('[heartbeat]', error.message);
+        });
+    };
+    beat();
+    const interval = setInterval(beat, 30000);
+    return () => clearInterval(interval);
+  }, [profile?.id]);
+
   const [showNotifications, setShowNotifications] = useState(false);
 
   const [lowStockItems, setLowStockItems] = useState<{ id: string; name: string; stock: number; min_stock: number }[]>([]);
@@ -256,9 +271,13 @@ export default function DashboardLayout({
                 className="flex items-center gap-3 pl-4 border-l border-slate-200 hover:opacity-80 transition-opacity"
               >
                 <span className="text-sm font-bold text-slate-700 hidden sm:block uppercase tracking-tight">{tenant?.name || 'Ferretería'}</span>
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-black shadow-lg shadow-primary/20">
-                  {tenant?.name?.charAt(0)?.toUpperCase() || 'F'}
-                </div>
+                {tenant?.logo_url ? (
+                  <img src={tenant.logo_url} alt={tenant.name} className="w-8 h-8 rounded-lg object-cover shadow-lg" />
+                ) : (
+                  <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white text-xs font-black shadow-lg shadow-primary/20">
+                    {tenant?.name?.charAt(0)?.toUpperCase() || 'F'}
+                  </div>
+                )}
                 <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform", showUserMenu && "rotate-180")} />
               </button>
 

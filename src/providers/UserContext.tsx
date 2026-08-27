@@ -16,6 +16,7 @@ type Tenant = {
   id: string;
   name: string;
   is_active: boolean;
+  logo_url: string | null;
 };
 
 type UserContextType = {

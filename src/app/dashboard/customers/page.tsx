@@ -34,8 +34,19 @@ export default function CustomersPage() {
   const [newCustomer, setNewCustomer] = useState({ full_name: '', nit: '', email: '', phone: '', address: '', city: '', credit_limit: '' });
   const [totalsByCustomer, setTotalsByCustomer] = useState<Record<string, { sales_count: number; total_amount: number }>>({});
   const [receivablesByCustomer, setreceivablesByCustomer] = useState<Record<string, { total_due: number; open_invoices: number }>>({});
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   const supabase = createClient();
+
+  useEffect(() => {
+    async function fetchRole() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+      if (data) setUserRole(data.role);
+    }
+    fetchRole();
+  }, []);
 
   const fetchCustomers = async () => {
     try {
@@ -170,6 +181,8 @@ export default function CustomersPage() {
     (c.nit && c.nit.includes(searchTerm))
   );
 
+  const canEdit = userRole === 'admin';
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -250,13 +263,15 @@ export default function CustomersPage() {
               transition={{ delay: i * 0.05 }}
               className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-slate-200/50 transition-all group relative overflow-hidden"
             >
-              <button
-                onClick={() => openEditCustomer(customer)}
-                className="absolute top-4 right-4 p-2 text-slate-300 hover:text-primary hover:bg-slate-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                title="Editar cliente"
-              >
-                <Pencil className="w-4 h-4" />
-              </button>
+              {canEdit && (
+                <button
+                  onClick={() => openEditCustomer(customer)}
+                  className="absolute top-4 right-4 p-2 text-slate-300 hover:text-primary hover:bg-slate-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                  title="Editar cliente"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              )}
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-900 text-2xl font-black border border-slate-100">
                   {customer.full_name.charAt(0)}
@@ -370,12 +385,14 @@ export default function CustomersPage() {
                     </td>
                     <td className="px-8 py-5">
                       <div className="flex justify-center">
+                        {canEdit && (
                         <button
                           onClick={() => openEditCustomer(customer)}
                           className="p-2 hover:bg-white rounded-xl border border-transparent hover:border-slate-100 text-slate-400 hover:text-primary transition-all"
                         >
                           <Pencil className="w-5 h-5" />
                         </button>
+                        )}
                       </div>
                     </td>
                   </motion.tr>

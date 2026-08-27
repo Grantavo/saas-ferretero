@@ -316,10 +316,10 @@ export default function POSPage() {
 
       {/* Documento */}
       <div className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden print-container">
-        <div className="p-10 border-b border-slate-100 flex justify-between items-start gap-10">
+        <div className="p-5 md:p-10 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start gap-6 md:gap-10">
           {/* Columna Izquierda: Cliente */}
           <div className="flex-1 space-y-4">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block no-print pt-14">Información del Cliente</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block no-print pt-6 md:pt-14">Información del Cliente</label>
             {selectedCustomer ? (
               <div className="space-y-1">
                 <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tighter">{selectedCustomer.full_name}</h2>
@@ -399,25 +399,25 @@ export default function POSPage() {
           </div>
 
           {/* Columna Derecha: Datos Documento */}
-          <div className="text-right flex flex-col items-end gap-6">
+          <div className="w-full md:w-auto text-left md:text-right flex flex-col items-start md:items-end gap-6">
             <div className="no-print">
               <div className="bg-slate-100 p-1 rounded-2xl flex gap-1">
-                <button onClick={() => setDocType('quote')} className={cn("px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", docType === 'quote' ? "bg-white text-primary shadow-sm" : "text-slate-400")}>Cotización</button>
-                <button onClick={() => setDocType('sale')} className={cn("px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all", docType === 'sale' ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400")}>Factura</button>
+                <button onClick={() => setDocType('quote')} className={cn("px-4 md:px-6 py-2 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all", docType === 'quote' ? "bg-white text-primary shadow-sm" : "text-slate-400")}>Cotización</button>
+                <button onClick={() => setDocType('sale')} className={cn("px-4 md:px-6 py-2 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-widest transition-all", docType === 'sale' ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400")}>Factura</button>
               </div>
             </div>
 
-            <div className="space-y-4 w-full">
-              <div className="flex justify-between items-center gap-8">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Vencimiento</label>
-                <p className="font-bold text-slate-700 text-sm">{docType === 'quote' ? new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' }) : 'Inmediato'}</p>
+            <div className="space-y-3 md:space-y-4 w-full">
+              <div className="flex justify-between items-center gap-4 md:gap-8">
+                <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Vencimiento</label>
+                <p className="font-bold text-slate-700 text-xs md:text-sm text-right">{docType === 'quote' ? new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toLocaleDateString('es-CO', { day: 'numeric', month: 'long' }) : 'Inmediato'}</p>
               </div>
-              <div className="flex justify-between items-center gap-8">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lista de precios</label>
-                <p className="font-bold text-slate-700 text-sm">Predeterminado (COP)</p>
+              <div className="flex justify-between items-center gap-4 md:gap-8">
+                <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Lista de precios</label>
+                <p className="font-bold text-slate-700 text-xs md:text-sm text-right">Predeterminado (COP)</p>
               </div>
-              <div className="flex justify-between items-center gap-8">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{docType === 'quote' ? 'Vigencia' : 'Términos de pago'}</label>
+              <div className="flex justify-between items-center gap-4 md:gap-8">
+                <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">{docType === 'quote' ? 'Vigencia' : 'Pago'}</label>
                 {docType === 'quote' ? (
                   <p className="font-bold text-slate-700 text-sm">8 Días</p>
                 ) : (
@@ -445,9 +445,9 @@ export default function POSPage() {
                   </div>
                 )}
               </div>
-              <div className="pt-2 border-t border-slate-50 flex justify-between items-center gap-8">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha Emisión</label>
-                <p className="font-bold text-slate-700 text-sm">{new Date().toLocaleDateString()}</p>
+              <div className="pt-2 border-t border-slate-50 flex justify-between items-center gap-4 md:gap-8">
+                <label className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Fecha Emisión</label>
+                <p className="font-bold text-slate-700 text-xs md:text-sm">{new Date().toLocaleDateString()}</p>
               </div>
             </div>
           </div>
@@ -458,22 +458,22 @@ export default function POSPage() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-50 bg-slate-50/20">
-                <th className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Descripción</th>
-                <th className="w-24 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Cant.</th>
-                <th className="w-32 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Subtotal sin IVA</th>
-                <th className="w-32 px-4 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">IVA</th>
-                <th className="w-40 px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total</th>
-                <th className="w-16 px-4 py-6 no-print"></th>
+                <th className="px-4 md:px-10 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Descripción</th>
+                <th className="w-16 md:w-24 px-2 md:px-4 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Cant.</th>
+                <th className="hidden sm:table-cell w-28 md:w-32 px-2 md:px-4 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Subtotal</th>
+                <th className="hidden sm:table-cell w-24 md:w-32 px-2 md:px-4 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">IVA</th>
+                <th className="w-28 md:w-40 px-4 md:px-10 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total</th>
+                <th className="w-12 md:w-16 px-2 md:px-4 py-4 md:py-6 no-print"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {cart.map(item => (
-                <tr key={item.id} className="h-[90px]">
-                  <td className="px-10 py-4">
-                    <p className="font-bold text-slate-800 uppercase tracking-tight line-clamp-1">{item.name}</p>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{item.brand}</p>
+                <tr key={item.id} className="h-auto md:h-[90px]">
+                  <td className="px-4 md:px-10 py-3 md:py-4">
+                    <p className="font-bold text-slate-800 uppercase tracking-tight text-xs md:text-sm line-clamp-1">{item.name}</p>
+                    <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{item.brand}</p>
                   </td>
-                  <td className="w-24 px-4 py-4 text-center">
+                  <td className="w-16 md:w-24 px-2 md:px-4 py-3 md:py-4 text-center">
                     <input
                       type="number"
                       min={1}
@@ -490,15 +490,15 @@ export default function POSPage() {
                         if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
                       }}
                       onBlur={() => updateQuantity(item.id, item.quantity)}
-                      className="w-16 text-center font-bold text-slate-700 bg-slate-50/50 rounded-lg py-2 border-none outline-none focus:ring-2 focus:ring-primary/10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all tabular-nums"
+                      className="w-14 md:w-16 text-center font-bold text-slate-700 bg-slate-50/50 rounded-lg py-1.5 md:py-2 border-none outline-none focus:ring-2 focus:ring-primary/10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all tabular-nums text-xs md:text-sm"
                     />
                   </td>
-                  <td className="w-32 px-4 py-4 text-right font-bold text-slate-500 whitespace-nowrap tabular-nums">{formatCurrency(item.base_price * item.quantity)}</td>
-                  <td className="w-32 px-4 py-4 text-right font-bold text-slate-500 whitespace-nowrap tabular-nums">{formatCurrency(item.base_price * (item.tax_percentage / 100) * item.quantity)}</td>
-                  <td className="w-40 px-10 py-4 text-right font-black text-slate-900 whitespace-nowrap tabular-nums">{formatCurrency(item.base_price * (1 + item.tax_percentage/100) * item.quantity)}</td>
-                  <td className="w-16 px-4 py-4 text-center no-print">
-                    <button onClick={() => removeFromCart(item.id)} className="p-2 text-slate-200 hover:text-red-500 transition-colors">
-                      <Trash2 className="w-5 h-5" />
+                  <td className="hidden sm:table-cell w-28 md:w-32 px-2 md:px-4 py-3 md:py-4 text-right font-bold text-slate-500 whitespace-nowrap tabular-nums text-xs md:text-sm">{formatCurrency(item.base_price * item.quantity)}</td>
+                  <td className="hidden sm:table-cell w-24 md:w-32 px-2 md:px-4 py-3 md:py-4 text-right font-bold text-slate-500 whitespace-nowrap tabular-nums text-xs md:text-sm">{formatCurrency(item.base_price * (item.tax_percentage / 100) * item.quantity)}</td>
+                  <td className="w-28 md:w-40 px-4 md:px-10 py-3 md:py-4 text-right font-black text-slate-900 whitespace-nowrap tabular-nums text-xs md:text-sm">{formatCurrency(item.base_price * (1 + item.tax_percentage/100) * item.quantity)}</td>
+                  <td className="w-12 md:w-16 px-2 md:px-4 py-3 md:py-4 text-center no-print">
+                    <button onClick={() => removeFromCart(item.id)} className="p-1.5 md:p-2 text-slate-200 hover:text-red-500 transition-colors">
+                      <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
                     </button>
                   </td>
                 </tr>
@@ -508,7 +508,7 @@ export default function POSPage() {
         </div>
 
         {/* Totales */}
-        <div className="p-10 bg-slate-50/30 flex flex-col md:flex-row justify-between items-start gap-12 border-t border-slate-100">
+        <div className="p-5 md:p-10 bg-slate-50/30 flex flex-col md:flex-row justify-between items-start gap-8 md:gap-12 border-t border-slate-100">
           <div className="max-w-md">
             <p className="text-[10px] text-slate-400 leading-relaxed font-medium uppercase tracking-wider">
               {docType === 'quote' ? 'Vigencia de 8 días. Precios incluyen IVA.' : 'Factura de venta legal.'}
@@ -528,19 +528,19 @@ export default function POSPage() {
             )}
           </div>
           <div className="w-full md:w-80 space-y-3">
-            <div className="flex justify-between text-sm font-bold text-slate-500 uppercase tracking-widest">
+            <div className="flex justify-between text-xs md:text-sm font-bold text-slate-500 uppercase tracking-widest">
               <span>Subtotal (sin IVA)</span>
               <span>{formatCurrency(subtotal)}</span>
             </div>
-            <div className="flex justify-between text-sm font-bold text-slate-500 uppercase tracking-widest">
+            <div className="flex justify-between text-xs md:text-sm font-bold text-slate-500 uppercase tracking-widest">
               <span>IVA ({effectiveIvaRate}%)</span>
               <span>{formatCurrency(tax)}</span>
             </div>
-            <div className="pt-6 border-t border-slate-200 flex justify-between items-end">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total a Pagar</span>
-              <span className="text-4xl font-black text-slate-900 tracking-tighter leading-none">{formatCurrency(total)}</span>
+            <div className="pt-4 md:pt-6 border-t border-slate-200 flex justify-between items-end">
+              <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total a Pagar</span>
+              <span className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter leading-none">{formatCurrency(total)}</span>
             </div>
-            <div className="pt-8 flex gap-3 no-print">
+            <div className="pt-6 md:pt-8 flex flex-col sm:flex-row gap-3 no-print">
               {docType === 'sale' ? (
                 <button 
                   onClick={handleCheckout} 
