@@ -50,7 +50,7 @@ export default function SalesPage() {
     new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(val);
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="w-full space-y-6 sm:space-y-8 pb-20">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-black tracking-tight">Ventas</h1>
@@ -112,14 +112,14 @@ export default function SalesPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-[420px]">
               <thead>
                 <tr className="bg-slate-50/50 border-b border-slate-100">
-                  <th className="px-4 md:px-8 py-4 md:py-5 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest">ID</th>
-                  <th className="px-3 md:px-6 py-4 md:py-5 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest">Fecha</th>
-                  <th className="hidden sm:table-cell px-3 md:px-6 py-4 md:py-5 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest">Método</th>
-                  <th className="px-3 md:px-6 py-4 md:py-5 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest text-right">Total</th>
-                  <th className="px-4 md:px-8 py-4 md:py-5 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest text-center"></th>
+                  <th className="hidden sm:table-cell px-4 md:px-8 py-3 md:py-5 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest">ID</th>
+                  <th className="px-3 md:px-6 py-3 md:py-5 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest">Fecha</th>
+                  <th className="hidden sm:table-cell px-3 md:px-6 py-3 md:py-5 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest">Método</th>
+                  <th className="px-3 md:px-6 py-3 md:py-5 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest text-right">Total</th>
+                  <th className="px-3 md:px-8 py-3 md:py-5 text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest text-center"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -131,21 +131,21 @@ export default function SalesPage() {
                     transition={{ delay: i * 0.05 }}
                     className="hover:bg-slate-50 transition-colors group"
                   >
-                    <td className="px-4 md:px-8 py-3 md:py-5">
+                    <td className="hidden sm:table-cell px-4 md:px-8 py-2.5 md:py-5">
                       <span className="font-bold text-slate-900 text-xs md:text-sm">#{sale.id.slice(0, 8).toUpperCase()}</span>
                     </td>
-                    <td className="px-3 md:px-6 py-3 md:py-5 text-[11px] md:text-sm text-slate-500 font-medium">
+                    <td className="px-3 md:px-6 py-2.5 md:py-5 text-[10px] sm:text-[11px] md:text-sm text-slate-500 font-medium">
                       {new Date(sale.created_at).toLocaleString('es-CO')}
                     </td>
-                    <td className="hidden sm:table-cell px-3 md:px-6 py-3 md:py-5">
+                    <td className="hidden sm:table-cell px-3 md:px-6 py-2.5 md:py-5">
                       <span className="px-2.5 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[9px] md:text-[10px] font-black uppercase tracking-wider">
                         Efectivo
                       </span>
                     </td>
-                    <td className="px-3 md:px-6 py-3 md:py-5 text-right">
-                      <span className="font-black text-slate-900 text-sm md:text-lg">{formatCurrency(sale.total_amount)}</span>
+                    <td className="px-3 md:px-6 py-2.5 md:py-5 text-right">
+                      <span className="font-black text-slate-900 text-xs sm:text-sm md:text-lg">{formatCurrency(sale.total_amount)}</span>
                     </td>
-                    <td className="px-4 md:px-8 py-3 md:py-5">
+                    <td className="px-3 md:px-8 py-2.5 md:py-5">
                       <div className="flex justify-center">
                         <Link
                           href={`/dashboard/sales/${sale.id}`}

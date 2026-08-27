@@ -240,7 +240,7 @@ export default function POSPage() {
   if (loading) return <div className="h-screen flex items-center justify-center"><Loader2 className="w-12 h-12 text-primary animate-spin" /></div>;
 
   return (
-    <div className="max-w-[1100px] mx-auto space-y-8 pb-20">
+    <div className="w-full max-w-[1100px] mx-auto space-y-6 sm:space-y-8 pb-20">
       <style jsx global>{`
         @media print {
           body * { visibility: hidden !important; }
@@ -251,7 +251,7 @@ export default function POSPage() {
       `}</style>
 
       {/* Header Búsqueda */}
-      <div className="bg-white p-5 md:p-8 rounded-[30px] md:rounded-[40px] border border-slate-100 shadow-sm no-print">
+      <div className="bg-white p-4 sm:p-5 md:p-8 rounded-[24px] sm:rounded-[30px] md:rounded-[40px] border border-slate-100 shadow-sm no-print">
         {/* Buscar Cliente */}
         <div className="relative w-full" ref={customerBoxRef}>
           <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -315,8 +315,8 @@ export default function POSPage() {
       </div>
 
       {/* Documento */}
-      <div className="bg-white rounded-[40px] border border-slate-100 shadow-sm overflow-hidden print-container">
-        <div className="p-5 md:p-10 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start gap-6 md:gap-10">
+      <div className="bg-white rounded-[24px] sm:rounded-[40px] border border-slate-100 shadow-sm overflow-hidden print-container">
+        <div className="p-4 sm:p-5 md:p-10 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start gap-4 md:gap-10">
           {/* Columna Izquierda: Cliente */}
           <div className="flex-1 space-y-4">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block no-print pt-6 md:pt-14">Información del Cliente</label>
@@ -454,26 +454,26 @@ export default function POSPage() {
         </div>
 
         {/* Tabla */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <table className="w-full text-left min-w-[480px]">
             <thead>
               <tr className="border-b border-slate-50 bg-slate-50/20">
-                <th className="px-4 md:px-10 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Descripción</th>
-                <th className="w-16 md:w-24 px-2 md:px-4 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Cant.</th>
-                <th className="hidden sm:table-cell w-28 md:w-32 px-2 md:px-4 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Subtotal</th>
-                <th className="hidden sm:table-cell w-24 md:w-32 px-2 md:px-4 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">IVA</th>
-                <th className="w-28 md:w-40 px-4 md:px-10 py-4 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total</th>
-                <th className="w-12 md:w-16 px-2 md:px-4 py-4 md:py-6 no-print"></th>
+                <th className="px-3 sm:px-4 md:px-10 py-3 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Descripción</th>
+                <th className="w-14 sm:w-16 md:w-24 px-1.5 sm:px-2 md:px-4 py-3 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Cant.</th>
+                <th className="hidden sm:table-cell w-28 md:w-32 px-2 md:px-4 py-3 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Subtotal</th>
+                <th className="hidden sm:table-cell w-24 md:w-32 px-2 md:px-4 py-3 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">IVA</th>
+                <th className="w-24 sm:w-28 md:w-40 px-3 sm:px-4 md:px-10 py-3 md:py-6 text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Total</th>
+                <th className="w-10 sm:w-12 md:w-16 px-1.5 sm:px-2 md:px-4 py-3 md:py-6 no-print"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {cart.map(item => (
                 <tr key={item.id} className="h-auto md:h-[90px]">
-                  <td className="px-4 md:px-10 py-3 md:py-4">
-                    <p className="font-bold text-slate-800 uppercase tracking-tight text-xs md:text-sm line-clamp-1">{item.name}</p>
-                    <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{item.brand}</p>
+                  <td className="px-3 sm:px-4 md:px-10 py-2.5 sm:py-3 md:py-4">
+                    <p className="font-bold text-slate-800 uppercase tracking-tight text-[11px] sm:text-xs md:text-sm line-clamp-1">{item.name}</p>
+                    <p className="text-[7px] sm:text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{item.brand}</p>
                   </td>
-                  <td className="w-16 md:w-24 px-2 md:px-4 py-3 md:py-4 text-center">
+                  <td className="w-14 sm:w-16 md:w-24 px-1.5 sm:px-2 md:px-4 py-2.5 sm:py-3 md:py-4 text-center">
                     <input
                       type="number"
                       min={1}
@@ -490,15 +490,15 @@ export default function POSPage() {
                         if (e.key === 'ArrowUp' || e.key === 'ArrowDown') e.preventDefault();
                       }}
                       onBlur={() => updateQuantity(item.id, item.quantity)}
-                      className="w-14 md:w-16 text-center font-bold text-slate-700 bg-slate-50/50 rounded-lg py-1.5 md:py-2 border-none outline-none focus:ring-2 focus:ring-primary/10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all tabular-nums text-xs md:text-sm"
+                      className="w-12 sm:w-14 md:w-16 text-center font-bold text-slate-700 bg-slate-50/50 rounded-lg py-1 md:py-2 border-none outline-none focus:ring-2 focus:ring-primary/10 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all tabular-nums text-[11px] sm:text-xs md:text-sm"
                     />
                   </td>
-                  <td className="hidden sm:table-cell w-28 md:w-32 px-2 md:px-4 py-3 md:py-4 text-right font-bold text-slate-500 whitespace-nowrap tabular-nums text-xs md:text-sm">{formatCurrency(item.base_price * item.quantity)}</td>
-                  <td className="hidden sm:table-cell w-24 md:w-32 px-2 md:px-4 py-3 md:py-4 text-right font-bold text-slate-500 whitespace-nowrap tabular-nums text-xs md:text-sm">{formatCurrency(item.base_price * (item.tax_percentage / 100) * item.quantity)}</td>
-                  <td className="w-28 md:w-40 px-4 md:px-10 py-3 md:py-4 text-right font-black text-slate-900 whitespace-nowrap tabular-nums text-xs md:text-sm">{formatCurrency(item.base_price * (1 + item.tax_percentage/100) * item.quantity)}</td>
-                  <td className="w-12 md:w-16 px-2 md:px-4 py-3 md:py-4 text-center no-print">
-                    <button onClick={() => removeFromCart(item.id)} className="p-1.5 md:p-2 text-slate-200 hover:text-red-500 transition-colors">
-                      <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
+                  <td className="hidden sm:table-cell w-28 md:w-32 px-2 md:px-4 py-2.5 sm:py-3 md:py-4 text-right font-bold text-slate-500 whitespace-nowrap tabular-nums text-xs md:text-sm">{formatCurrency(item.base_price * item.quantity)}</td>
+                  <td className="hidden sm:table-cell w-24 md:w-32 px-2 md:px-4 py-2.5 sm:py-3 md:py-4 text-right font-bold text-slate-500 whitespace-nowrap tabular-nums text-xs md:text-sm">{formatCurrency(item.base_price * (item.tax_percentage / 100) * item.quantity)}</td>
+                  <td className="w-24 sm:w-28 md:w-40 px-3 sm:px-4 md:px-10 py-2.5 sm:py-3 md:py-4 text-right font-black text-slate-900 whitespace-nowrap tabular-nums text-[11px] sm:text-xs md:text-sm">{formatCurrency(item.base_price * (1 + item.tax_percentage/100) * item.quantity)}</td>
+                  <td className="w-10 sm:w-12 md:w-16 px-1.5 sm:px-2 md:px-4 py-2.5 sm:py-3 md:py-4 text-center no-print">
+                    <button onClick={() => removeFromCart(item.id)} className="p-1 md:p-2 text-slate-200 hover:text-red-500 transition-colors">
+                      <Trash2 className="w-3.5 h-3.5 md:w-5 md:h-5" />
                     </button>
                   </td>
                 </tr>
@@ -508,7 +508,7 @@ export default function POSPage() {
         </div>
 
         {/* Totales */}
-        <div className="p-5 md:p-10 bg-slate-50/30 flex flex-col md:flex-row justify-between items-start gap-8 md:gap-12 border-t border-slate-100">
+        <div className="p-4 sm:p-5 md:p-10 bg-slate-50/30 flex flex-col md:flex-row justify-between items-start gap-6 md:gap-12 border-t border-slate-100">
           <div className="max-w-md">
             <p className="text-[10px] text-slate-400 leading-relaxed font-medium uppercase tracking-wider">
               {docType === 'quote' ? 'Vigencia de 8 días. Precios incluyen IVA.' : 'Factura de venta legal.'}

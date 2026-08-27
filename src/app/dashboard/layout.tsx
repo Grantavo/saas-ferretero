@@ -312,7 +312,7 @@ export default function DashboardLayout({
         </header>
 
         <main className={cn(
-          "flex-1 overflow-y-auto overflow-x-clip",
+          "flex-1 overflow-y-auto overflow-x-hidden",
           isHome ? "p-0" : "p-4 sm:p-6 lg:p-8",
           "print:p-0"
         )}>

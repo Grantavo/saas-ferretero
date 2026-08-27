@@ -80,7 +80,7 @@ export default function SaleDetailPage() {
   };
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="w-full space-y-6 sm:space-y-8 pb-20">
       <style jsx global>{`
         @media print {
           body * { visibility: hidden !important; }
